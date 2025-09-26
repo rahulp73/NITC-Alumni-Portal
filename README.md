@@ -20,3 +20,6 @@ It aims to provide features like:
 1. Clone the repository:
    ```bash
    git clone https://github.com/rahulp73/NITC-Alumni-Portal.git
+
+
+- Setup for Vikram completed on September 22, 2025. Ready for the challenge!
