@@ -1,4 +1,4 @@
-Vikrams Clone
+Nikhis Clone
 
 Welcome, team! To keep our project organized and our Git history clean, please follow these simple guidelines when you contribute code.
 
