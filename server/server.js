@@ -4,6 +4,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import router from './router/routes.js';
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -13,14 +14,12 @@ app.use(cookieParser());
 app.use(express.json());
 mongoose.set('strictQuery', true);
 app.use(cors({
-    origin: ['http://localhost:3000'],
+    origin: true,
     optionsSuccessStatus: 204,
     credentials: true
 }));
 
-app.get('/', (req, res) => {
-    res.send('API is running....');
-})
+app.use("", router);
 
 const startServer = async () => {
     try {

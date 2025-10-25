@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { CssBaseline } from '@mui/material';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import getAuthToken from './utils/getAuthToken';
 
 // Routing and Auth
 import PrivateRoutes from './PrivateRoutes';
@@ -19,7 +21,13 @@ import './App.css';
 import Events from './pages/Events';
 
 function App() {
-  const [authToken, setAuthToken] = useState(true);
+  const [authToken, setAuthToken] = useState(Boolean(getAuthToken()));
+
+  const GoogleWrapper = () => {
+    return <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <SignIn setAuthToken={setAuthToken} />
+    </GoogleOAuthProvider>;
+  }
 
   return (
     <BrowserRouter>
@@ -27,7 +35,7 @@ function App() {
       <Routes>
         {/* Routes for unauthenticated users */}
         <Route element={<ProtectedRoutes authToken={authToken} />}>
-          <Route path="/signin" element={<SignIn setAuthToken={setAuthToken} />} />
+          <Route path="/signin" element={<GoogleWrapper/>} />
         </Route>
 
         {/* Routes for authenticated users, wrapped in the CrudDashboard layout */}

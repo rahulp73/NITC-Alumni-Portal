@@ -30,7 +30,7 @@ export default function CrudDashboard(props) {
           {/* DashboardLayout should contain the <Outlet /> component, 
             which will render the nested child routes (EmployeeList, EmployeeEdit, etc.).
           */}
-          <DashboardLayout>
+          <DashboardLayout setAuthToken={props.setAuthToken}>
             <Outlet />
           </DashboardLayout>
         </DialogsProvider>

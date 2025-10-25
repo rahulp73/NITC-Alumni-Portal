@@ -8,7 +8,7 @@ import DashboardHeader from './DashboardHeader';
 import DashboardSidebar from './DashboardSidebar';
 import SitemarkIcon from './SitemarkIcon';
 
-export default function DashboardLayout() {
+export default function DashboardLayout({ setAuthToken }) {
   const theme = useTheme();
 
   const [isDesktopNavigationExpanded, setIsDesktopNavigationExpanded] =
@@ -58,6 +58,7 @@ export default function DashboardLayout() {
       }}
     >
       <DashboardHeader
+        setAuthToken={setAuthToken}
         logo={<SitemarkIcon />}
         title=""
         menuOpen={isNavigationExpanded}

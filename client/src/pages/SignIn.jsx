@@ -12,11 +12,14 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
-import { styled } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
 import ForgotPassword from '../components/sign-in/ForgotPassword';
 import AppTheme from '../components/shared-theme/AppTheme';
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from '../components/sign-in/CustomIcons';
 import whiteLogoWithFont from '../images/WhiteLogoWithFont.png';
+import darkLogoWithFont from '../images/BlueLogoWithFont.png';
+import { useGoogleLogin } from '@react-oauth/google';
+import { useNavigate } from 'react-router-dom';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -67,6 +70,9 @@ export default function SignIn(props) {
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
 
+  const theme = useTheme();
+  const navigate = useNavigate();
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -74,6 +80,36 @@ export default function SignIn(props) {
   const handleClose = () => {
     setOpen(false);
   };
+
+  // const googleLogin = useGoogleLogin({
+  //   flow: 'auth-code',
+  //   redirect_uri:'http://localhost:5173',
+  // })
+
+  const googleLogin = useGoogleLogin({
+    flow: 'auth-code',
+    // ux_mode: 'redirect',
+    redirect_uri: 'http://localhost:5173', // redirect to frontend
+    onSuccess: async (response) => {
+      const code = response.code;
+      const res = await fetch('http://localhost:8080/auth/google/callback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ code }),
+      })
+      const data = await res.json();
+      console.log("Response:", data);
+
+      if (res.ok) {
+        props.setAuthToken(true);
+        navigate('/');
+      } else {
+        console.error("Login failed:", data);
+      }
+    },
+    onError: (err) => console.error(err),
+  });
 
   const handleSubmit = (event) => {
     if (emailError || passwordError) {
@@ -114,6 +150,9 @@ export default function SignIn(props) {
     return isValid;
   };
 
+  // Determine which logo to display based on the theme mode
+  const currentLogo = theme.palette.mode === 'dark' ? darkLogoWithFont : whiteLogoWithFont;
+
   return (
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
@@ -121,8 +160,8 @@ export default function SignIn(props) {
         {/* <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} /> */}
         <Card variant="outlined">
           {/* <WhiteLogo /> */}
-          <img src={whiteLogoWithFont} style={{height:'20%',width:'50%',margin:'0 auto'}}/>
-          <Divider/>
+          <img src={currentLogo} style={{ height: '20%', width: '50%', margin: '0 auto' }} />
+          <Divider />
           <Typography
             component="h1"
             variant="h4"
@@ -203,7 +242,7 @@ export default function SignIn(props) {
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => alert('Sign in with Google')}
+              onClick={googleLogin}
               startIcon={<GoogleIcon />}
             >
               Sign in with Google

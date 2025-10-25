@@ -10,8 +10,11 @@ import Typography from '@mui/material/Typography';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import Stack from '@mui/material/Stack';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import ThemeSwitcher from './ThemeSwitcher';
+import whiteLogoWithFont from '../../../images/WhiteLogoWithFont.png';
+import darkLogoWithFont from '../../../images/BlueLogoWithFont.png';
+import { Button } from '@mui/material';
 
 const AppBar = styled(MuiAppBar)(({ theme }) => ({
   borderWidth: 0,
@@ -32,7 +35,10 @@ const LogoContainer = styled('div')({
   },
 });
 
-function DashboardHeader({ logo, title, menuOpen, onToggleMenu }) {
+function DashboardHeader({ setAuthToken, logo, title, menuOpen, onToggleMenu }) {
+
+  const navigate = useNavigate();
+  
   const theme = useTheme();
 
   const handleMenuOpen = React.useCallback(() => {
@@ -64,6 +70,25 @@ function DashboardHeader({ logo, title, menuOpen, onToggleMenu }) {
     [handleMenuOpen],
   );
 
+  // Determine which logo to display based on the theme mode
+  const currentLogo = theme.palette.mode === 'dark' ? darkLogoWithFont : whiteLogoWithFont;
+
+  const logout = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (response.ok) {
+        setAuthToken(false); // Redirect to sign-in page after logout
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('An error occurred during logout:', error);
+    }
+  };
+
   return (
     <AppBar color="inherit" position="absolute" sx={{ displayPrint: 'none' }}>
       <Toolbar sx={{ backgroundColor: 'inherit', mx: { xs: -0.75, sm: -1 } }}>
@@ -80,8 +105,9 @@ function DashboardHeader({ logo, title, menuOpen, onToggleMenu }) {
             <Box sx={{ mr: 1 }}>{getMenuIcon(menuOpen)}</Box>
             <Link to="/" style={{ textDecoration: 'none' }}>
               <Stack direction="row" alignItems="center">
-                {logo ? <LogoContainer>{logo}</LogoContainer> : null}
-                {title ? (
+                <LogoContainer><img src={currentLogo}/></LogoContainer>
+                {/* {logo ? <LogoContainer>{logo}</LogoContainer> : null} */}
+                {/* {title ? (
                   <Typography
                     variant="h6"
                     sx={{
@@ -94,7 +120,7 @@ function DashboardHeader({ logo, title, menuOpen, onToggleMenu }) {
                   >
                     {title}
                   </Typography>
-                ) : null}
+                ) : null} */}
               </Stack>
             </Link>
           </Stack>
@@ -104,6 +130,9 @@ function DashboardHeader({ logo, title, menuOpen, onToggleMenu }) {
             spacing={1}
             sx={{ marginLeft: 'auto' }}
           >
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Button onClick={()=>logout()}>Logout</Button>
+            </Stack>
             <Stack direction="row" alignItems="center">
               <ThemeSwitcher />
             </Stack>
