@@ -19,6 +19,8 @@ import Home from './pages/Home';
 
 import './App.css';
 import Events from './pages/Events';
+import Alumni from './pages/Alumni';
+import Jobs from './pages/Jobs';
 
 function App() {
   const [authToken, setAuthToken] = useState(Boolean(getAuthToken()));
@@ -46,7 +48,9 @@ function App() {
             <Route index element={<EmployeeList />} />
             
             {/* The other employee routes can stay the same for resource organization */}
+            <Route path="alumni" element={<Alumni/>} />
             <Route path="events" element={<Events/>} />
+            <Route path="jobs" element={<Jobs/>} />
             <Route path="employees/new" element={<EmployeeCreate />} />
             <Route path="employees/:employeeId" element={<EmployeeShow />} />
             <Route path="employees/:employeeId/edit" element={<EmployeeEdit />} />

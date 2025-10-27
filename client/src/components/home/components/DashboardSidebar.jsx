@@ -10,6 +10,9 @@ import Toolbar from '@mui/material/Toolbar';
 import PersonIcon from '@mui/icons-material/Person';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import DescriptionIcon from '@mui/icons-material/Description';
+import Event from '@mui/icons-material/Event';
+import Groups from '@mui/icons-material/Groups';
+import Work from '@mui/icons-material/Work';
 import LayersIcon from '@mui/icons-material/Layers';
 import { matchPath, useLocation } from 'react-router';
 import DashboardSidebarContext from '../context/DashboardSidebarContext';
@@ -126,15 +129,36 @@ function DashboardSidebar({
               width: mini ? MINI_DRAWER_WIDTH : 'auto',
             }}
           >
-            <DashboardSidebarHeaderItem>Main items</DashboardSidebarHeaderItem>
-            <DashboardSidebarPageItem
+            {/* <DashboardSidebarHeaderItem>Main items</DashboardSidebarHeaderItem> */}
+            {/* <DashboardSidebarPageItem
               id="employees"
               title="Employees"
               icon={<PersonIcon />}
               href="/employees"
               selected={!!matchPath('/employees/*', pathname) || pathname === '/'}
+            /> */}
+            <DashboardSidebarPageItem
+              id="alumni"
+              title="Alumni"
+              icon={<Groups />}
+              href="/alumni"
+              selected={!!matchPath('/alumni/*', pathname)}
             />
-            <DashboardSidebarDividerItem />
+            <DashboardSidebarPageItem
+              id="events"
+              title="Events"
+              icon={<Event />}
+              href="/events"
+              selected={!!matchPath('/events/*', pathname)}
+            />
+            <DashboardSidebarPageItem
+              id="jobs"
+              title="Jobs"
+              icon={<Work />}
+              href="/jobs"
+              selected={!!matchPath('/jobs/*', pathname)}
+            />
+            {/* <DashboardSidebarDividerItem />
             <DashboardSidebarHeaderItem>Example items</DashboardSidebarHeaderItem>
             <DashboardSidebarPageItem
               id="reports"
@@ -177,7 +201,7 @@ function DashboardSidebar({
               icon={<LayersIcon />}
               href="/integrations"
               selected={!!matchPath('/integrations', pathname)}
-            />
+            /> */}
           </List>
         </Box>
       </React.Fragment>
