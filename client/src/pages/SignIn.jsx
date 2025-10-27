@@ -20,6 +20,7 @@ import whiteLogoWithFont from '../images/WhiteLogoWithFont.png';
 import darkLogoWithFont from '../images/BlueLogoWithFont.png';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -150,8 +151,8 @@ export default function SignIn(props) {
     return isValid;
   };
 
-  // Determine which logo to display based on the theme mode
-  const currentLogo = theme.palette.mode === 'dark' ? darkLogoWithFont : whiteLogoWithFont;
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: light)');
+  const currentLogo = prefersDarkMode ? darkLogoWithFont : whiteLogoWithFont;
 
   return (
     <AppTheme {...props}>

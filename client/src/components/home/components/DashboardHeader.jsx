@@ -10,11 +10,11 @@ import Typography from '@mui/material/Typography';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import Stack from '@mui/material/Stack';
-import { Link, useNavigate } from 'react-router';
+import { Link } from 'react-router';
 import ThemeSwitcher from './ThemeSwitcher';
 import whiteLogoWithFont from '../../../images/WhiteLogoWithFont.png';
 import darkLogoWithFont from '../../../images/BlueLogoWithFont.png';
-import { Button } from '@mui/material';
+import { Button, useMediaQuery } from '@mui/material';
 
 const AppBar = styled(MuiAppBar)(({ theme }) => ({
   borderWidth: 0,
@@ -32,13 +32,12 @@ const LogoContainer = styled('div')({
   alignItems: 'center',
   '& img': {
     maxHeight: 40,
+    width: 100,
   },
 });
 
 function DashboardHeader({ setAuthToken, logo, title, menuOpen, onToggleMenu }) {
 
-  const navigate = useNavigate();
-  
   const theme = useTheme();
 
   const handleMenuOpen = React.useCallback(() => {
@@ -71,7 +70,10 @@ function DashboardHeader({ setAuthToken, logo, title, menuOpen, onToggleMenu }) 
   );
 
   // Determine which logo to display based on the theme mode
-  const currentLogo = theme.palette.mode === 'dark' ? darkLogoWithFont : whiteLogoWithFont;
+  //   const currentLogo = theme.palette.mode === 'dark' ? darkLogoWithFont : whiteLogoWithFont;
+
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: light)');
+  const currentLogo = prefersDarkMode ? darkLogoWithFont : whiteLogoWithFont;
 
   const logout = async () => {
     try {
@@ -105,7 +107,7 @@ function DashboardHeader({ setAuthToken, logo, title, menuOpen, onToggleMenu }) 
             <Box sx={{ mr: 1 }}>{getMenuIcon(menuOpen)}</Box>
             <Link to="/" style={{ textDecoration: 'none' }}>
               <Stack direction="row" alignItems="center">
-                <LogoContainer><img src={currentLogo}/></LogoContainer>
+                <LogoContainer><img src={currentLogo} /></LogoContainer>
                 {/* {logo ? <LogoContainer>{logo}</LogoContainer> : null} */}
                 {/* {title ? (
                   <Typography
@@ -131,7 +133,7 @@ function DashboardHeader({ setAuthToken, logo, title, menuOpen, onToggleMenu }) 
             sx={{ marginLeft: 'auto' }}
           >
             <Stack direction="row" alignItems="center" spacing={2}>
-              <Button onClick={()=>logout()}>Logout</Button>
+              <Button onClick={() => logout()}>Logout</Button>
             </Stack>
             <Stack direction="row" alignItems="center">
               <ThemeSwitcher />
