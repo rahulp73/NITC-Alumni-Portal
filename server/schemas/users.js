@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  password: {
+    type: String,
+    required: false // Only required for standard sign-up
+  },
   image: {
     type: String
   },

@@ -69,6 +69,7 @@ export default function SignIn(props) {
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
+  const [submitError, setSubmitError] = React.useState('');
   const [open, setOpen] = React.useState(false);
 
   const theme = useTheme();
@@ -112,16 +113,34 @@ export default function SignIn(props) {
     onError: (err) => console.error(err),
   });
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setSubmitError('');
     if (emailError || passwordError) {
-      event.preventDefault();
       return;
     }
     const data = new FormData(event.currentTarget);
-    console.log({
+    const payload = {
       email: data.get('email'),
       password: data.get('password'),
-    });
+    };
+    try {
+      const res = await fetch('http://localhost:8080/auth/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+      const result = await res.json();
+      if (res.ok) {
+        props.setAuthToken && props.setAuthToken(true);
+        navigate('/');
+      } else {
+        setSubmitError(result.message || 'Sign in failed');
+      }
+    } catch (err) {
+      setSubmitError('Sign in failed');
+    }
   };
 
   const validateInputs = () => {
@@ -215,11 +234,12 @@ export default function SignIn(props) {
                 color={passwordError ? 'error' : 'primary'}
               />
             </FormControl>
-            <FormControlLabel
+            {/* <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"
-            />
+            /> */}
             <ForgotPassword open={open} handleClose={handleClose} />
+            {submitError && <Typography color="error">{submitError}</Typography>}
             <Button
               type="submit"
               fullWidth
@@ -259,7 +279,7 @@ export default function SignIn(props) {
             <Typography sx={{ textAlign: 'center' }}>
               Don&apos;t have an account?{' '}
               <Link
-                href="/material-ui/getting-started/templates/sign-in/"
+                href="/SignUp"
                 variant="body2"
                 sx={{ alignSelf: 'center' }}
               >

@@ -10,6 +10,7 @@ import ProtectedRoutes from './ProtectedRoutes';
 
 // Layouts and Pages
 import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
 import CrudDashboard from './components/home/CrudDashboard';
 import EmployeeList from './components/home/components/EmployeeList';
 import EmployeeCreate from './components/home/components/EmployeeCreate';
@@ -38,6 +39,7 @@ function App() {
         {/* Routes for unauthenticated users */}
         <Route element={<ProtectedRoutes authToken={authToken} />}>
           <Route path="/signin" element={<GoogleWrapper/>} />
+          <Route path="/signup" element={<SignUp setAuthToken={setAuthToken} />} />
         </Route>
 
         {/* Routes for authenticated users, wrapped in the CrudDashboard layout */}
