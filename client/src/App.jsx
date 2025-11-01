@@ -72,11 +72,13 @@ function App() {
         {/* Routes for authenticated users, wrapped in the CrudDashboard layout */}
         <Route element={<PrivateRoutes authToken={authToken} />}>
           <Route path="/" element={<Home setAuthToken={setAuthToken} user={user} />}>
-            {/* Admin route (admin only, protected) */}
-            <Route index element={<EmployeeList />} />
+            {/* 👇 Default route redirects to /alumni */}
+            <Route index element={<Navigate to="alumni" replace />} />
+            {/* <Route index element={<EmployeeList />} /> */}
             <Route path="alumni" element={<Alumni user={user} />} />
             <Route path="events" element={<Events user={user} />} />
             <Route path="jobs" element={<Jobs user={user} />} />
+            {/* Admin route (admin only, protected) */}
             {user?.role === 'admin' && (
               <Route path="admin" element={<AdminDashboard />} />
             )}

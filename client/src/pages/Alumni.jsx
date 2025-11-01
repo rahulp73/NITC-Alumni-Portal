@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@mui/material';
 import { DataGrid, gridClasses } from '@mui/x-data-grid';
-import { getMany as getAlumni } from '../components/home/data/alumni.jsx';
+
 import PageContainer from '../components/home/components/PageContainer.jsx';
 
 const INITIAL_PAGE_SIZE = 10;
@@ -35,13 +35,44 @@ export default function Alumni({ user }) {
 
   const [isLoading, setIsLoading] = React.useState(true);
 
+
   const loadData = React.useCallback(async () => {
     setIsLoading(true);
-    const listData = await getAlumni({ paginationModel, filterModel });
-    setRowsState({
-      rows: listData.items,
-      rowCount: listData.itemCount,
-    });
+    try {
+      // Build query string from filters
+      const params = new URLSearchParams();
+      if (filterModel.degree) params.append('degreeType', filterModel.degree);
+      if (filterModel.department) params.append('department', filterModel.department);
+      if (filterModel.year) params.append('graduationYear', filterModel.year);
+      if (filterModel.country) params.append('currentLocation', filterModel.country);
+      if (filterModel.industry) params.append('industryDomain', filterModel.industry);
+      // Pagination (optional, backend can be improved for this)
+      // params.append('page', paginationModel.page);
+      // params.append('pageSize', paginationModel.pageSize);
+
+      const res = await fetch(`http://localhost:8080/alumni/search?${params.toString()}`, {
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to fetch alumni');
+      const data = await res.json();
+      setRowsState({
+        rows: data.map(row => ({
+          id: row._id || row.id,
+          name: row.name,
+          degreeType: row.degreeType,
+          department: row.department,
+          graduationYear: row.graduationYear,
+          currentLocation: row.currentLocation,
+          industryDomain: row.industryDomain,
+          organization: row.organization,
+          areaOfExpertise: row.areaOfExpertise,
+          email: row.email,
+        })),
+        rowCount: data.length,
+      });
+    } catch (e) {
+      setRowsState({ rows: [], rowCount: 0 });
+    }
     setIsLoading(false);
   }, [paginationModel, filterModel]);
 
@@ -61,13 +92,14 @@ export default function Alumni({ user }) {
   };
 
   const columns = [
-    { field: 'id', headerName: 'ID', width: 80 },
     { field: 'name', headerName: 'Name', flex: 1, minWidth: 150 },
-    { field: 'degree', headerName: 'Degree', width: 120 },
+    { field: 'degreeType', headerName: 'Degree', width: 120 },
     { field: 'department', headerName: 'Department', width: 180 },
-    { field: 'year', headerName: 'Year', width: 100 },
-    { field: 'country', headerName: 'Location', width: 150 },
-    { field: 'industry', headerName: 'Industry / Domain', flex: 1, minWidth: 200 },
+    { field: 'graduationYear', headerName: 'Year', width: 100 },
+    { field: 'currentLocation', headerName: 'Location', width: 150 },
+    { field: 'organization', headerName: 'Organization', width: 180 },
+    { field: 'areaOfExpertise', headerName: 'Area of Expertise', width: 200 },
+    { field: 'industryDomain', headerName: 'Industry / Domain', flex: 1, minWidth: 200 },
     { field: 'email', headerName: 'Email', flex: 1, minWidth: 200 },
   ];
 
@@ -141,22 +173,28 @@ export default function Alumni({ user }) {
       </Paper>
 
       <Box sx={{ flex: 1, width: '100%' }}>
-        <DataGrid
-          rows={rowsState.rows}
-          rowCount={rowsState.rowCount}
-          columns={columns}
-          pagination
-          paginationMode="server"
-          paginationModel={paginationModel}
-          onPaginationModelChange={handlePaginationModelChange}
-          loading={isLoading}
-          pageSizeOptions={[5, 10, 25]}
-          sx={{
-            [`& .${gridClasses.columnHeader}, & .${gridClasses.cell}`]: {
-              outline: 'transparent',
-            },
-          }}
-        />
+        {rowsState.rowCount === 0 && !isLoading ? (
+          <Typography sx={{ m: 4, textAlign: 'center' }} color="text.secondary">
+            No alumni to search.
+          </Typography>
+        ) : (
+          <DataGrid
+            rows={rowsState.rows}
+            rowCount={rowsState.rowCount}
+            columns={columns}
+            pagination
+            paginationMode="server"
+            paginationModel={paginationModel}
+            onPaginationModelChange={handlePaginationModelChange}
+            loading={isLoading}
+            pageSizeOptions={[5, 10, 25]}
+            sx={{
+              [`& .${gridClasses.columnHeader}, & .${gridClasses.cell}`]: {
+                outline: 'transparent',
+              },
+            }}
+          />
+        )}
       </Box>
     </PageContainer>
   );
