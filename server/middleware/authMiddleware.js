@@ -1,3 +1,19 @@
+// Role-based middleware
+import User from '../schemas/users.js';
+
+export const requireRole = (roles) => async (req, res, next) => {
+    try {
+        if (!req._id) return res.status(401).json({ message: 'Unauthorized' });
+        const user = await User.findById(req._id);
+        if (!user || !roles.includes(user.role)) {
+            return res.status(403).json({ message: 'Forbidden: Insufficient role' });
+        }
+        req.user = user;
+        next();
+    } catch (err) {
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
 import JWT from 'jsonwebtoken'
 
 export const authMiddleware = async (req, res, next) => {

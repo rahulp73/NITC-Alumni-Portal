@@ -14,7 +14,7 @@ import PageContainer from '../components/home/components/PageContainer.jsx';
 
 const INITIAL_PAGE_SIZE = 10;
 
-export default function Alumni() {
+export default function Alumni({ user }) {
   const [paginationModel, setPaginationModel] = React.useState({
     page: 0,
     pageSize: INITIAL_PAGE_SIZE,
@@ -74,7 +74,9 @@ export default function Alumni() {
   const pageTitle = 'Alumni Directory';
 
   return (
-    <PageContainer title={pageTitle} breadcrumbs={[{ title: pageTitle }]}>
+    <PageContainer title={pageTitle}
+    //  breadcrumbs={[{ title: pageTitle }]}
+     >
       <Paper sx={{ p: 2, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
           Search Alumni

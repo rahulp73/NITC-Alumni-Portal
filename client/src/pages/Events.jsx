@@ -19,8 +19,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import EventCard from '../components/EventCard';
 import PageContainer from '../components/home/components/PageContainer';
 
-const EventsPage = () => {
+const EventsPage = ({ user }) => {
   const [events, setEvents] = useState([]);
+  const [registering, setRegistering] = useState({}); // eventId: loading
+  const [registeredEvents, setRegisteredEvents] = useState([]); // eventIds user registered for
   const [open, setOpen] = useState(false);
 
   // Form states
@@ -28,40 +30,80 @@ const EventsPage = () => {
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState([]);
 
   useEffect(() => {
-    // Mock initial data
-    setEvents([
-      {
-        id: 1,
-        title: 'Annual Alumni Reunion',
-        date: '2025-12-15',
-        location: 'Online',
-        description: 'Join us for the annual get-together.',
-        tags: ['Networking', 'Alumni', 'Virtual'],
-      },
-      {
-        id: 2,
-        title: 'Tech Talk: AI in 2025',
-        date: '2025-11-20',
-        location: 'CSE Seminar Hall',
-        description: 'A talk by a distinguished alumnus.',
-        tags: ['AI', 'Technology', 'Seminar'],
-      },
-    ]);
+    // Fetch events and registrations from backend
+    const fetchEvents = async () => {
+      try {
+        const res = await fetch('http://localhost:8080/events', {
+          credentials: 'include',
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setEvents(data);
+        }
+      } catch (err) {}
+    };
+    fetchEvents();
+    // Fetch registered events for current user
+    const fetchRegistered = async () => {
+      try {
+        const res = await fetch('http://localhost:8080/events/registered', {
+          credentials: 'include',
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setRegisteredEvents(data.map(e => e.eventId || e));
+        }
+      } catch (err) {}
+    };
+    fetchRegistered();
   }, []);
+  // Register for event
+  const handleRegister = async (eventId) => {
+    setRegistering((prev) => ({ ...prev, [eventId]: true }));
+    try {
+      const res = await fetch(`http://localhost:8080/events/${eventId}/register`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (res.ok) {
+        setRegisteredEvents((prev) => [...prev, eventId]);
+      }
+    } catch (err) {}
+    setRegistering((prev) => ({ ...prev, [eventId]: false }));
+  };
+
+  // Unregister from event
+  const handleUnregister = async (eventId) => {
+    setRegistering((prev) => ({ ...prev, [eventId]: true }));
+    try {
+      const res = await fetch(`http://localhost:8080/events/${eventId}/register`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (res.ok) {
+        setRegisteredEvents((prev) => prev.filter(id => id !== eventId));
+      }
+    } catch (err) {}
+    setRegistering((prev) => ({ ...prev, [eventId]: false }));
+  };
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
     setTitle('');
     setDate('');
-    setLocation('');
-    setDescription('');
-    setTags([]);
-    setTagInput('');
+  setLocation('');
+  setDescription('');
+  setEndDate('');
+  setTags([]);
+  setTagInput('');
   };
 
   const handleAddTag = () => {
@@ -75,128 +117,167 @@ const EventsPage = () => {
     setTags(tags.filter(tag => tag !== tagToDelete));
   };
 
-  const handleCreateEvent = (e) => {
+  const handleCreateEvent = async (e) => {
     e.preventDefault();
-    const newEvent = {
-      id: events.length + 1,
-      title,
-      date,
-      location,
-      description,
-      tags,
-    };
-    setEvents([...events, newEvent]);
-    handleClose();
+    try {
+      const res = await fetch('http://localhost:8080/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ title, date, endDate, location, description, tags }),
+      });
+      if (res.ok) {
+        const newEvent = await res.json();
+        setEvents((prev) => [...prev, newEvent]);
+        handleClose();
+      }
+    } catch (err) {
+      // Optionally handle error
+    }
   };
+
+  // Students, alumni, and admin can create events
+  const canCreateEvent = user?.role === 'student' || user?.role === 'alumni' || user?.role === 'admin';
 
   return (
     <PageContainer>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={3}>
         <Typography variant="h4">Upcoming Events</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleOpen}
-        >
-          Create Event
-        </Button>
+        {canCreateEvent && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleOpen}
+          >
+            Create Event
+          </Button>
+        )}
       </Stack>
 
-      <Grid container spacing={2}>
-        {events.map(event => (
-          <Grid item xs={12} md={6} key={event.id}>
-            <EventCard event={event} />
-          </Grid>
-        ))}
-      </Grid>
+      {events.length === 0 ? (
+        <Box sx={{ textAlign: 'center', mt: 6, color: 'text.secondary' }}>
+          <Typography variant="h6">There are no upcoming events.</Typography>
+        </Box>
+      ) : (
+        <Grid container spacing={2}>
+          {events.map(event => {
+            const eventId = event._id || event.id;
+            const isRegistered = registeredEvents.includes(eventId);
+            const isLoading = !!registering[eventId];
+            return (
+              <Grid item xs={12} md={6} key={eventId}>
+                <EventCard
+                  event={event}
+                  user={user}
+                  isRegistered={isRegistered}
+                  isLoading={isLoading}
+                  onRegister={() => handleRegister(eventId)}
+                  onUnregister={() => handleUnregister(eventId)}
+                />
+              </Grid>
+            );
+          })}
+        </Grid>
+      )}
 
       {/* ✅ Create Event Modal */}
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>
-          Create Event
-          <IconButton
-            aria-label="close"
-            onClick={handleClose}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
+      {canCreateEvent && (
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogTitle>
+            Create Event
+            <IconButton
+              aria-label="close"
+              onClick={handleClose}
+              sx={{
+                position: 'absolute',
+                right: 8,
+                top: 8,
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
 
-        <DialogContent dividers>
-          <Stack spacing={2} mt={1}>
-            <TextField
-              label="Event Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              fullWidth
-              required
-            />
-            <TextField
-              label="Date"
-              type="date"
-              InputLabelProps={{ shrink: true }}
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              fullWidth
-              required
-            />
-            <TextField
-              label="Location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              fullWidth
-              required
-            />
-            <TextField
-              label="Description"
-              multiline
-              rows={3}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              fullWidth
-            />
-
-            {/* ✅ Tag Input */}
-            <Stack direction="row" spacing={1} alignItems="center">
+          <DialogContent dividers>
+            <Stack spacing={2} mt={1}>
               <TextField
-                label="Add Tag"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                size="small"
+                label="Event Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Start Date"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                fullWidth
+                required
+              />
+              <TextField
+                label="End Date For Registration"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Description"
+                multiline
+                rows={3}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
                 fullWidth
               />
-              <Button variant="outlined" onClick={handleAddTag}>
-                Add
-              </Button>
-            </Stack>
 
-            {/* ✅ Display Tags */}
-            <Stack direction="row" spacing={1} flexWrap="wrap">
-              {tags.map((tag) => (
-                <Chip
-                  key={tag}
-                  label={tag}
-                  onDelete={() => handleDeleteTag(tag)}
-                  color="success"
+              {/* ✅ Tag Input */}
+              <Stack direction="row" spacing={1} alignItems="center">
+                <TextField
+                  label="Add Tag"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
                   size="small"
+                  fullWidth
                 />
-              ))}
-            </Stack>
-          </Stack>
-        </DialogContent>
+                <Button variant="outlined" onClick={handleAddTag}>
+                  Add
+                </Button>
+              </Stack>
 
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleCreateEvent} variant="contained">
-            Create
-          </Button>
-        </DialogActions>
-      </Dialog>
+              {/* ✅ Display Tags */}
+              <Stack direction="row" spacing={1} flexWrap="wrap">
+                {tags.map((tag) => (
+                  <Chip
+                    key={tag}
+                    label={tag}
+                    onDelete={() => handleDeleteTag(tag)}
+                    color="success"
+                    size="small"
+                  />
+                ))}
+              </Stack>
+            </Stack>
+          </DialogContent>
+
+          <DialogActions>
+            <Button onClick={handleClose}>Cancel</Button>
+            <Button onClick={handleCreateEvent} variant="contained">
+              Create
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </PageContainer>
   );
 };

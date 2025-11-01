@@ -5,6 +5,9 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import router from './router/routes.js';
+import jobsRouter from './router/jobs.js';
+import eventsRouter from './router/events.js';
+import alumniRouter from './router/alumni.js';
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -20,6 +23,9 @@ app.use(cors({
 }));
 
 app.use("", router);
+app.use("/jobs", jobsRouter);
+app.use("/events", eventsRouter);
+app.use("/alumni", alumniRouter);
 
 const startServer = async () => {
     try {

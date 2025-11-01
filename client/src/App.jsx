@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { CssBaseline } from '@mui/material';
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -22,16 +22,43 @@ import './App.css';
 import Events from './pages/Events';
 import Alumni from './pages/Alumni';
 import Jobs from './pages/Jobs';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   const [authToken, setAuthToken] = useState(Boolean(getAuthToken()));
+  const [user, setUser] = useState(null); // { role: 'student' | 'alumni' | 'admin', ... }
+
+  // Fetch user info after login
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!authToken) {
+        setUser(null);
+        return;
+      }
+      try {
+        const res = await fetch('http://localhost:8080/userInfo', {
+          credentials: 'include',
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user || data);
+        } else {
+          setUser(null);
+        }
+      } catch {
+        setUser(null);
+      }
+    };
+    fetchUser();
+  }, [authToken]);
 
   const GoogleWrapper = () => {
     return <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <SignIn setAuthToken={setAuthToken} />
     </GoogleOAuthProvider>;
-  }
+  };
 
+  // Role-based routing
   return (
     <BrowserRouter>
       <CssBaseline />
@@ -42,27 +69,24 @@ function App() {
           <Route path="/signup" element={<SignUp setAuthToken={setAuthToken} />} />
         </Route>
 
+        {/* Admin route */}
+        {user?.role === 'admin' && (
+          <Route path="/admin" element={<AdminDashboard />} />
+        )}
+
         {/* Routes for authenticated users, wrapped in the CrudDashboard layout */}
         <Route element={<PrivateRoutes authToken={authToken} />}>
-          <Route path="/" element={<Home setAuthToken={setAuthToken} />}>
-            
-            {/* CHANGE HERE: The index route now directly renders EmployeeList at "/" */}
+          <Route path="/" element={<Home setAuthToken={setAuthToken} user={user} />}>
             <Route index element={<EmployeeList />} />
-            
-            {/* The other employee routes can stay the same for resource organization */}
-            <Route path="alumni" element={<Alumni/>} />
-            <Route path="events" element={<Events/>} />
-            <Route path="jobs" element={<Jobs/>} />
+            <Route path="alumni" element={<Alumni user={user} />} />
+            <Route path="events" element={<Events user={user} />} />
+            <Route path="jobs" element={<Jobs user={user} />} />
             <Route path="employees/new" element={<EmployeeCreate />} />
             <Route path="employees/:employeeId" element={<EmployeeShow />} />
             <Route path="employees/:employeeId/edit" element={<EmployeeEdit />} />
-
-            {/* CHANGE HERE: The fallback now navigates to the root path "/" */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Route>
-        
-        {/* A top-level fallback for any route that doesn't match */}
         <Route path='*' element={<Navigate to='/' />} />
       </Routes>
     </BrowserRouter>
