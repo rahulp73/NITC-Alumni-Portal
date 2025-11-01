@@ -55,9 +55,21 @@ export const logout = (req, res) => {
 // Standard Sign Up (no extra verification)
 export const signup = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+    const {
+      name,
+      email,
+      password,
+      role,
+      graduationYear,
+      degreeType,
+      department,
+      areaOfExpertise,
+      industryDomain,
+      currentLocation,
+      organization
+    } = req.body;
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ message: "Name, email, password, and role are required" });
     }
     let user = await User.findOne({ email });
     if (user) {
@@ -65,7 +77,20 @@ export const signup = async (req, res) => {
     }
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    user = await User.create({ name, email, password: hashedPassword, status: 'verified' });
+    user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role,
+      graduationYear,
+      degreeType,
+      department,
+      areaOfExpertise,
+      industryDomain,
+      currentLocation: role === 'alumni' ? currentLocation : undefined,
+      organization: role === 'alumni' ? organization : undefined,
+      status: 'verified'
+    });
     const token = JWT.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
     res.status(201).cookie("token", token, options).json({ message: "Signup successful" });
   } catch (error) {

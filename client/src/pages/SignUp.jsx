@@ -38,6 +38,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
 
 const SignUpContainer = styled(Stack)(({ theme }) => ({
   minHeight: '100vh',
+  position: 'relative',
   padding: theme.spacing(2),
   [theme.breakpoints.up('sm')]: {
     padding: theme.spacing(4),
@@ -45,7 +46,7 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
   '&::before': {
     content: '""',
     display: 'block',
-    position: 'absolute',
+    position: 'fixed',
     zIndex: -1,
     inset: 0,
     backgroundImage:
@@ -59,6 +60,7 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function SignUp(props) {
+  const [role, setRole] = React.useState('student');
   const [nameError, setNameError] = React.useState(false);
   const [nameErrorMessage, setNameErrorMessage] = React.useState('');
   const [emailError, setEmailError] = React.useState(false);
@@ -113,6 +115,14 @@ export default function SignUp(props) {
       name: data.get('name'),
       email: data.get('email'),
       password: data.get('password'),
+      role: data.get('role'),
+      graduationYear: data.get('graduationYear'),
+      degreeType: data.get('degreeType'),
+      department: data.get('department'),
+      areaOfExpertise: data.get('areaOfExpertise'),
+      industryDomain: data.get('industryDomain'),
+      currentLocation: data.get('currentLocation'),
+      organization: data.get('organization'),
     };
     try {
       const res = await fetch('http://localhost:8080/auth/signup', {
@@ -144,6 +154,20 @@ export default function SignUp(props) {
             Sign up
           </Typography>
           <Box component="form" onSubmit={handleSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2 }}>
+            <FormControl>
+              <FormLabel htmlFor="role">Are you a student or alumni?</FormLabel>
+              <select
+                id="role"
+                name="role"
+                value={role}
+                onChange={e => setRole(e.target.value)}
+                style={{ padding: '10px', borderRadius: '4px', borderColor: '#ccc', marginTop: 4 }}
+                required
+              >
+                <option value="student">Student</option>
+                <option value="alumni">Alumni</option>
+              </select>
+            </FormControl>
             <FormControl>
               <FormLabel htmlFor="name">Name</FormLabel>
               <TextField
@@ -191,6 +215,101 @@ export default function SignUp(props) {
                 color={passwordError ? 'error' : 'primary'}
               />
             </FormControl>
+            <FormControl>
+              <FormLabel htmlFor="graduationYear">Graduation Year</FormLabel>
+              <select
+                id="graduationYear"
+                name="graduationYear"
+                required
+                style={{ padding: '10px', borderRadius: '4px', borderColor: '#ccc', marginTop: 4 }}
+              >
+                <option value="">Select Year</option>
+                {Array.from({ length: 50 }, (_, i) => 1980 + i).map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </FormControl>
+            <FormControl>
+              <FormLabel htmlFor="degreeType">Degree Type</FormLabel>
+              <select
+                id="degreeType"
+                name="degreeType"
+                required
+                style={{ padding: '10px', borderRadius: '4px', borderColor: '#ccc', marginTop: 4 }}
+              >
+                <option value="">Select Degree</option>
+                <option value="BTech">BTech</option>
+                <option value="MTech">MTech</option>
+                <option value="PhD">PhD</option>
+              </select>
+            </FormControl>
+            <FormControl>
+              <FormLabel htmlFor="department">Department</FormLabel>
+              <select
+                id="department"
+                name="department"
+                required
+                style={{ padding: '10px', borderRadius: '4px', borderColor: '#ccc', marginTop: 4 }}
+              >
+                <option value="">Select Department</option>
+                <option value="CSE">CSE</option>
+                <option value="EEE">EEE</option>
+                <option value="ECE">ECE</option>
+                <option value="ME">ME</option>
+                <option value="CE">CE</option>
+                <option value="CH">CH</option>
+                <option value="ARCHI">ARCHI</option>
+                <option value="MME">MME</option>
+                <option value="PHY">PHY</option>
+                <option value="MATH">MATH</option>
+                <option value="SOM">SOM</option>
+                <option value="Others">Others</option>
+              </select>
+            </FormControl>
+            <FormControl>
+              <FormLabel htmlFor="areaOfExpertise">Area of Expertise</FormLabel>
+              <TextField
+                id="areaOfExpertise"
+                name="areaOfExpertise"
+                placeholder="e.g. Machine Learning, Power Systems"
+                fullWidth
+                variant="outlined"
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel htmlFor="industryDomain">Industry Domain</FormLabel>
+              <TextField
+                id="industryDomain"
+                name="industryDomain"
+                placeholder="e.g. IT, Manufacturing"
+                fullWidth
+                variant="outlined"
+              />
+            </FormControl>
+            {role === 'alumni' && (
+              <>
+                <FormControl>
+                  <FormLabel htmlFor="currentLocation">Current Location</FormLabel>
+                  <TextField
+                    id="currentLocation"
+                    name="currentLocation"
+                    placeholder="e.g. Bangalore, India"
+                    fullWidth
+                    variant="outlined"
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel htmlFor="organization">Current Organization</FormLabel>
+                  <TextField
+                    id="organization"
+                    name="organization"
+                    placeholder="e.g. Google, NITC"
+                    fullWidth
+                    variant="outlined"
+                  />
+                </FormControl>
+              </>
+            )}
             {submitError && <Typography color="error">{submitError}</Typography>}
             <Button type="submit" fullWidth variant="contained">
               Sign up

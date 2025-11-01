@@ -21,6 +21,28 @@ const userSchema = new mongoose.Schema({
   image: {
     type: String
   },
+  graduationYear: {
+    type: Number
+  },
+  degreeType: {
+    type: String,
+    enum: ['BTech', 'MTech', 'PhD']
+  },
+  department: {
+    type: String
+  },
+  areaOfExpertise: {
+    type: String
+  },
+  industryDomain: {
+    type: String
+  },
+  currentLocation: {
+    type: String
+  },
+  organization: {
+    type: String
+  },
   role: {
     type: String,
     enum: ['alumni', 'student', 'admin'],
