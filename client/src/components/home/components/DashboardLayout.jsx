@@ -69,6 +69,7 @@ export default function DashboardLayout({ setAuthToken, user }) {
         title=""
         menuOpen={isNavigationExpanded}
         onToggleMenu={handleToggleHeaderMenu}
+        user={user}
       />
       <DashboardSidebar
         expanded={isNavigationExpanded}

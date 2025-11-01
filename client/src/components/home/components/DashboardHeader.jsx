@@ -10,11 +10,11 @@ import Typography from '@mui/material/Typography';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import Stack from '@mui/material/Stack';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router-dom';
 import ThemeSwitcher from './ThemeSwitcher';
 import whiteLogoWithFont from '../../../images/WhiteLogoWithFont.png';
 import darkLogoWithFont from '../../../images/BlueLogoWithFont.png';
-import { Button, useMediaQuery } from '@mui/material';
+import { useMediaQuery, Avatar, Menu, MenuItem } from '@mui/material';
 
 const AppBar = styled(MuiAppBar)(({ theme }) => ({
   borderWidth: 0,
@@ -36,9 +36,12 @@ const LogoContainer = styled('div')({
   },
 });
 
-function DashboardHeader({ setAuthToken, logo, title, menuOpen, onToggleMenu }) {
+function DashboardHeader({ setAuthToken, logo, title, menuOpen, onToggleMenu, user }) {
 
   const theme = useTheme();
+  const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const menuOpenState = Boolean(anchorEl);
 
   const handleMenuOpen = React.useCallback(() => {
     onToggleMenu(!menuOpen);
@@ -75,7 +78,22 @@ function DashboardHeader({ setAuthToken, logo, title, menuOpen, onToggleMenu }) 
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: light)');
   const currentLogo = prefersDarkMode ? darkLogoWithFont : whiteLogoWithFont;
 
+  const handleAvatarClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleProfileClick = () => {
+    handleMenuClose();
+    // Navigate to profile page when implemented
+    navigate('/profile');
+  };
+
   const logout = async () => {
+    handleMenuClose();
     try {
       const response = await fetch('http://localhost:8080/auth/logout', {
         method: 'POST',
@@ -129,15 +147,39 @@ function DashboardHeader({ setAuthToken, logo, title, menuOpen, onToggleMenu }) 
           <Stack
             direction="row"
             alignItems="center"
-            spacing={1}
+            spacing={3}
             sx={{ marginLeft: 'auto' }}
           >
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <Button onClick={() => logout()}>Logout</Button>
-            </Stack>
             <Stack direction="row" alignItems="center">
               <ThemeSwitcher />
             </Stack>
+            <Avatar 
+              src={user?.image} 
+              alt={user?.name || 'User'} 
+              onClick={handleAvatarClick}
+              sx={{ 
+                width: 32, 
+                height: 32,
+                cursor: 'pointer'
+              }}
+              aria-controls={menuOpenState ? 'account-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={menuOpenState ? 'true' : undefined}
+            >
+              {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+            </Avatar>
+            <Menu
+              anchorEl={anchorEl}
+              id="account-menu"
+              open={menuOpenState}
+              onClose={handleMenuClose}
+              onClick={handleMenuClose}
+              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            >
+              <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
+              <MenuItem onClick={logout}>Logout</MenuItem>
+            </Menu>
           </Stack>
         </Stack>
       </Toolbar>
@@ -150,6 +192,8 @@ DashboardHeader.propTypes = {
   menuOpen: PropTypes.bool.isRequired,
   onToggleMenu: PropTypes.func.isRequired,
   title: PropTypes.string,
+  user: PropTypes.object,
+  setAuthToken: PropTypes.func.isRequired,
 };
 
 export default DashboardHeader;

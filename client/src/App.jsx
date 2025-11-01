@@ -23,6 +23,7 @@ import Events from './pages/Events';
 import Alumni from './pages/Alumni';
 import Jobs from './pages/Jobs';
 import AdminDashboard from './pages/AdminDashboard';
+import Profile from './pages/Profile';
 
 function App() {
   const [authToken, setAuthToken] = useState(Boolean(getAuthToken()));
@@ -78,6 +79,8 @@ function App() {
             <Route path="alumni" element={<Alumni user={user} />} />
             <Route path="events" element={<Events user={user} />} />
             <Route path="jobs" element={<Jobs user={user} />} />
+            <Route path="profile" element={<Profile user={user} setUser={setUser} />} />
+            <Route path="profile/:userId" element={<Profile setUser={setUser} />} />
             {/* Admin route (admin only, protected) */}
             {user?.role === 'admin' && (
               <Route path="admin" element={<AdminDashboard />} />

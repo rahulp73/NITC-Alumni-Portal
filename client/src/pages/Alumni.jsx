@@ -2,19 +2,20 @@
 import * as React from 'react';
 import {
   Box,
-  Grid,
   TextField,
   MenuItem,
   Paper,
   Typography,
 } from '@mui/material';
 import { DataGrid, gridClasses } from '@mui/x-data-grid';
+import { useNavigate } from 'react-router-dom';
 
 import PageContainer from '../components/home/components/PageContainer.jsx';
 
 const INITIAL_PAGE_SIZE = 10;
 
 export default function Alumni({ user }) {
+  const navigate = useNavigate();
   const [paginationModel, setPaginationModel] = React.useState({
     page: 0,
     pageSize: INITIAL_PAGE_SIZE,
@@ -91,6 +92,10 @@ export default function Alumni({ user }) {
     setPaginationModel(model);
   };
 
+  const handleRowClick = (params) => {
+    navigate(`/profile/${params.id}`);
+  };
+
   const columns = [
     { field: 'name', headerName: 'Name', flex: 1, minWidth: 150 },
     { field: 'degreeType', headerName: 'Degree', width: 120 },
@@ -113,63 +118,63 @@ export default function Alumni({ user }) {
         <Typography variant="h6" gutterBottom>
           Search Alumni
         </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              select
-              label="Degree Type"
-              // sx={{width:200}}
-              fullWidth
-              value={filterModel.degree}
-              onChange={handleFilterChange('degree')}
-            >
-              <MenuItem value="">All</MenuItem>
-              <MenuItem value="B.Tech">B.Tech</MenuItem>
-              <MenuItem value="M.Tech">M.Tech</MenuItem>
-              <MenuItem value="Ph.D.">Ph.D.</MenuItem>
-            </TextField>
-          </Grid>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: 2,
+            '& > *': {
+              flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 8px)', md: '1 1 calc(20% - 13px)' },
+              minWidth: { xs: '100%', sm: '200px', md: '150px' },
+            },
+          }}
+        >
+          <TextField
+            select
+            label="Degree Type"
+            fullWidth
+            value={filterModel.degree}
+            onChange={handleFilterChange('degree')}
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="B.Tech">B.Tech</MenuItem>
+            <MenuItem value="M.Tech">M.Tech</MenuItem>
+            <MenuItem value="Ph.D.">Ph.D.</MenuItem>
+          </TextField>
 
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              label="Department"
-              fullWidth
-              value={filterModel.department}
-              onChange={handleFilterChange('department')}
-              placeholder="e.g., Computer Science"
-            />
-          </Grid>
+          <TextField
+            label="Department"
+            fullWidth
+            value={filterModel.department}
+            onChange={handleFilterChange('department')}
+            placeholder="e.g., Computer Science"
+          />
 
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              label="Graduation Year"
-              fullWidth
-              value={filterModel.year}
-              onChange={handleFilterChange('year')}
-              placeholder="e.g., 2021"
-            />
-          </Grid>
+          <TextField
+            label="Graduation Year"
+            fullWidth
+            value={filterModel.year}
+            onChange={handleFilterChange('year')}
+            placeholder="e.g., 2021"
+          />
 
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              label="Country / Location"
-              fullWidth
-              value={filterModel.country}
-              onChange={handleFilterChange('country')}
-              placeholder="e.g., India"
-            />
-          </Grid>
+          <TextField
+            label="Country / Location"
+            fullWidth
+            value={filterModel.country}
+            onChange={handleFilterChange('country')}
+            placeholder="e.g., India"
+          />
 
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              label="Industry / Domain"
-              fullWidth
-              value={filterModel.industry}
-              onChange={handleFilterChange('industry')}
-              placeholder="e.g., AI, IT, Manufacturing"
-            />
-          </Grid>
-        </Grid>
+          <TextField
+            label="Industry / Domain"
+            fullWidth
+            value={filterModel.industry}
+            onChange={handleFilterChange('industry')}
+            placeholder="e.g., AI, IT, Manufacturing"
+          />
+        </Box>
       </Paper>
 
       <Box sx={{ flex: 1, width: '100%' }}>
@@ -186,11 +191,18 @@ export default function Alumni({ user }) {
             paginationMode="server"
             paginationModel={paginationModel}
             onPaginationModelChange={handlePaginationModelChange}
+            onRowClick={handleRowClick}
             loading={isLoading}
             pageSizeOptions={[5, 10, 25]}
             sx={{
               [`& .${gridClasses.columnHeader}, & .${gridClasses.cell}`]: {
                 outline: 'transparent',
+              },
+              '& .MuiDataGrid-row': {
+                cursor: 'pointer',
+                '&:hover': {
+                  backgroundColor: 'action.hover',
+                },
               },
             }}
           />
