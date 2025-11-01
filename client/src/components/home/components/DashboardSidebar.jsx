@@ -30,6 +30,7 @@ function DashboardSidebar({
   setExpanded,
   disableCollapsibleSidebar = false,
   container,
+  user,
 }) {
   const theme = useTheme();
 
@@ -158,6 +159,15 @@ function DashboardSidebar({
               href="/jobs"
               selected={!!matchPath('/jobs/*', pathname)}
             />
+            {user?.role === 'admin' && (
+              <DashboardSidebarPageItem
+                id="admin-dashboard"
+                title="Admin Dashboard"
+                icon={<BarChartIcon />}
+                href="/admin"
+                selected={!!matchPath('/admin', pathname)}
+              />
+            )}
             {/* <DashboardSidebarDividerItem />
             <DashboardSidebarHeaderItem>Example items</DashboardSidebarHeaderItem>
             <DashboardSidebarPageItem

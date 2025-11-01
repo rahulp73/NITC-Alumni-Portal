@@ -8,7 +8,9 @@ import DashboardHeader from './DashboardHeader';
 import DashboardSidebar from './DashboardSidebar';
 import SitemarkIcon from './SitemarkIcon';
 
-export default function DashboardLayout({ setAuthToken }) {
+import { useOutletContext } from 'react-router-dom';
+
+export default function DashboardLayout({ setAuthToken, user }) {
   const theme = useTheme();
 
   const [isDesktopNavigationExpanded, setIsDesktopNavigationExpanded] =
@@ -46,6 +48,10 @@ export default function DashboardLayout({ setAuthToken }) {
 
   const layoutRef = React.useRef(null);
 
+  // Get user from Outlet context (provided by App.jsx or Home.jsx)
+  // const { user } = useOutletContext?.() || {};
+  // const user = useOutletContext();
+  console.log("DashboardLayout user:", user);
   return (
     <Box
       ref={layoutRef}
@@ -68,6 +74,7 @@ export default function DashboardLayout({ setAuthToken }) {
         expanded={isNavigationExpanded}
         setExpanded={setIsNavigationExpanded}
         container={layoutRef?.current ?? undefined}
+        user={user}
       />
       <Box
         sx={{
@@ -87,7 +94,7 @@ export default function DashboardLayout({ setAuthToken }) {
             overflow: 'auto',
           }}
         >
-          <Outlet />
+          <Outlet context={{ user }} />
         </Box>
       </Box>
     </Box>

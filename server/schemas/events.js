@@ -10,7 +10,7 @@ const eventSchema = new mongoose.Schema({
   description: { type: String },
   tags: [String],
   capacity: { type: Number },
-  status: { type: String, enum: ["upcoming", "cancelled", "postponed", "completed"], default: "upcoming" },
+  status: { type: String, enum: ["pending", "upcoming", "cancelled", "postponed", "completed"], default: "pending" },
   publishedAt: { type: Date, default: Date.now },
   attendees: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 }, { timestamps: true });

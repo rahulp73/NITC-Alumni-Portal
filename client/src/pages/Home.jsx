@@ -22,16 +22,15 @@ const themeComponents = {
 
 // CrudDashboard no longer defines routes. It now provides the layout and context.
 export default function CrudDashboard(props) {
+  console.log("Home user prop:", props.user);
+  // Pass user prop down for sidebar role-based rendering
   return (
     <AppTheme {...props} themeComponents={themeComponents}>
       <CssBaseline enableColorScheme />
       <NotificationsProvider>
         <DialogsProvider>
-          {/* DashboardLayout should contain the <Outlet /> component, 
-            which will render the nested child routes (EmployeeList, EmployeeEdit, etc.).
-          */}
-          <DashboardLayout setAuthToken={props.setAuthToken}>
-            <Outlet />
+          <DashboardLayout setAuthToken={props.setAuthToken} user={props.user}>
+            <Outlet context={{ user: props.user }} />
           </DashboardLayout>
         </DialogsProvider>
       </NotificationsProvider>

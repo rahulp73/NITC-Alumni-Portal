@@ -65,22 +65,21 @@ function App() {
       <Routes>
         {/* Routes for unauthenticated users */}
         <Route element={<ProtectedRoutes authToken={authToken} />}>
-          <Route path="/signin" element={<GoogleWrapper/>} />
+          <Route path="/signin" element={<GoogleWrapper />} />
           <Route path="/signup" element={<SignUp setAuthToken={setAuthToken} />} />
         </Route>
-
-        {/* Admin route */}
-        {user?.role === 'admin' && (
-          <Route path="/admin" element={<AdminDashboard />} />
-        )}
 
         {/* Routes for authenticated users, wrapped in the CrudDashboard layout */}
         <Route element={<PrivateRoutes authToken={authToken} />}>
           <Route path="/" element={<Home setAuthToken={setAuthToken} user={user} />}>
+            {/* Admin route (admin only, protected) */}
             <Route index element={<EmployeeList />} />
             <Route path="alumni" element={<Alumni user={user} />} />
             <Route path="events" element={<Events user={user} />} />
             <Route path="jobs" element={<Jobs user={user} />} />
+            {user?.role === 'admin' && (
+              <Route path="admin" element={<AdminDashboard />} />
+            )}
             <Route path="employees/new" element={<EmployeeCreate />} />
             <Route path="employees/:employeeId" element={<EmployeeShow />} />
             <Route path="employees/:employeeId/edit" element={<EmployeeEdit />} />

@@ -16,6 +16,7 @@ export const createJob = async (req, res) => {
       applicationDeadline,
       internalApply,
       postedByUserId: req._id,
+      status: 'pending',
     });
     res.status(201).json(job);
   } catch (err) {
@@ -27,16 +28,40 @@ export const createJob = async (req, res) => {
 export const listJobs = async (req, res) => {
   try {
     const now = new Date();
-    // Only return jobs whose applicationDeadline is in the future (or not set)
-    const jobs = await Job.find({
+    let query = {
       $or: [
         { applicationDeadline: { $exists: false } },
         { applicationDeadline: { $gte: now } }
       ]
-    }).sort({ postedAt: -1 });
+    };
+    // Admin sees all jobs, others see only published or their own pending
+    if (req.user?.role === 'admin') {
+      // Show all jobs
+    } else {
+      query = {
+        ...query,
+        $or: [
+          { status: 'published' },
+          { status: 'pending', postedByUserId: req._id },
+        ],
+      };
+    }
+    const jobs = await Job.find(query).sort({ postedAt: -1 });
     res.json(jobs);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching jobs', error: err.message });
+  }
+};
+
+// Admin: verify job (set status to 'published')
+export const verifyJob = async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const job = await Job.findByIdAndUpdate(jobId, { status: 'published' }, { new: true });
+    if (!job) return res.status(404).json({ message: 'Job not found' });
+    res.json(job);
+  } catch (err) {
+    res.status(500).json({ message: 'Error verifying job', error: err.message });
   }
 };
 

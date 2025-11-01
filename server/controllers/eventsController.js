@@ -38,6 +38,7 @@ export const createEvent = async (req, res) => {
       capacity,
       organizerUserId: req._id,
       organizerName: req.user?.name || '',
+      status: 'pending',
     });
     res.status(201).json(event);
   } catch (err) {
@@ -49,11 +50,35 @@ export const createEvent = async (req, res) => {
 export const listEvents = async (req, res) => {
   try {
     const now = new Date();
-    // Only return events whose endDate is in the future
-    const events = await Event.find({ endDate: { $gte: now } }).sort({ date: 1 });
+    let query = { endDate: { $gte: now } };
+    // Admin sees all pending and verified, others see only verified or their own pending
+    if (req.user?.role === 'admin') {
+      // Show all events
+    } else {
+      query = {
+        ...query,
+        $or: [
+          { status: 'upcoming' },
+          { status: 'pending', organizerUserId: req._id },
+        ],
+      };
+    }
+    const events = await Event.find(query).sort({ date: 1 });
     res.json(events);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching events', error: err.message });
+  }
+};
+
+// Admin: verify event (set status to 'upcoming')
+export const verifyEvent = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const event = await Event.findByIdAndUpdate(eventId, { status: 'upcoming' }, { new: true });
+    if (!event) return res.status(404).json({ message: 'Event not found' });
+    res.json(event);
+  } catch (err) {
+    res.status(500).json({ message: 'Error verifying event', error: err.message });
   }
 };
 
