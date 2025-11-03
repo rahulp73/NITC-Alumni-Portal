@@ -71,9 +71,18 @@ function DashboardHeader({ setAuthToken, logo, title, menuOpen, onToggleMenu, us
     [handleMenuOpen],
   );
 
-  // Use browser theme preference for logo
-  const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const currentLogo = prefersDarkMode ? whiteLogoWithFont : darkLogoWithFont ;
+  // Use browser theme preference for logo and update on change
+  const getPrefersDarkMode = () => window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const [prefersDarkMode, setPrefersDarkMode] = React.useState(getPrefersDarkMode());
+
+  React.useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e) => setPrefersDarkMode(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  const currentLogo = prefersDarkMode ? whiteLogoWithFont : darkLogoWithFont;
 
   const handleAvatarClick = (event) => {
     setAnchorEl(event.currentTarget);
