@@ -2,12 +2,26 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+  <link id="favicon" rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NITC Alumni Connect Portal</title>
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Dynamically switch favicon based on browser theme
+      function setFavicon() {
+        const darkFavicon = '/favicon-dark.png';
+        const lightFavicon = '/favicon.png';
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const favicon = document.getElementById('favicon');
+        if (favicon) {
+          favicon.href = prefersDark ? darkFavicon : lightFavicon;
+        }
+      }
+      setFavicon();
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setFavicon);
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
