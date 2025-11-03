@@ -178,70 +178,78 @@ const JobPostingsPage = ({ user }) => {
           <Typography variant="h6">There are no jobs.</Typography>
         </Box>
       ) : (
-        <Grid container spacing={3}>
+        <Box sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 3,
+          justifyContent: { xs: 'center', sm: 'flex-start' },
+        }}>
           {jobs.map((job) => (
-            <Grid item xs={12} sm={6} md={4} key={job.id}>
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  borderRadius: 2,
-                  boxShadow: 3,
-                }}
-              >
-                <CardContent>
-                  <Typography variant="h6" fontWeight="bold" gutterBottom>
-                    {job.title}
-                  </Typography>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    {job.company}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                    📍 {job.location} • {job.type}
-                  </Typography>
+            <Card
+              key={job.id}
+              sx={{
+                width: { xs: '100%', sm: 340, md: 360 },
+                minWidth: 280,
+                maxWidth: 400,
+                flex: '1 1 320px',
+                display: 'flex',
+                flexDirection: 'column',
+                borderRadius: 2,
+                boxShadow: 3,
+                mb: 2,
+              }}
+            >
+              <CardContent>
+                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                  {job.title}
+                </Typography>
+                <Typography variant="subtitle1" color="text.secondary">
+                  {job.company}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  📍 {job.location} • {job.type}
+                </Typography>
 
-                  <Typography variant="body2" sx={{ mt: 2 }}>
-                    {job.description}
-                  </Typography>
+                <Typography variant="body2" sx={{ mt: 2 }}>
+                  {job.description}
+                </Typography>
 
-                  {/* Tags */}
-                  {job.tags?.length > 0 && (
-                    <Stack direction="row" flexWrap="wrap" gap={1} mt={2}>
-                      {job.tags.map((tag) => (
-                        <Chip
-                          key={tag}
-                          label={tag}
-                          color="primary"
-                          size="small"
-                          variant="filled"
-                        />
-                      ))}
-                    </Stack>
-                  )}
-                </CardContent>
-
-                <CardActions sx={{ mt: 'auto', justifyContent: 'flex-end' }}>
-                  {(user?.role === 'student' || user?.role === 'alumni') && (
-                    appliedJobs.includes(job._id || job.id) ? (
-                      <Button size="small" variant="outlined" color="success" disabled>Applied</Button>
-                    ) : (
-                      <Button
-                        size="small"
-                        variant="contained"
+                {/* Tags */}
+                {job.tags?.length > 0 && (
+                  <Stack direction="row" flexWrap="wrap" gap={1} mt={2}>
+                    {job.tags.map((tag) => (
+                      <Chip
+                        key={tag}
+                        label={tag}
                         color="primary"
-                        disabled={!!applying[job._id || job.id]}
-                        onClick={() => handleApply(job._id || job.id)}
-                      >
-                        {applying[job._id || job.id] ? 'Applying...' : 'Apply'}
-                      </Button>
-                    )
-                  )}
-                </CardActions>
-              </Card>
-            </Grid>
+                        size="small"
+                        variant="filled"
+                      />
+                    ))}
+                  </Stack>
+                )}
+              </CardContent>
+
+              <CardActions sx={{ mt: 'auto', justifyContent: 'flex-end' }}>
+                {(user?.role === 'student' || user?.role === 'alumni') && (
+                  appliedJobs.includes(job._id || job.id) ? (
+                    <Button size="small" variant="outlined" color="success" disabled>Applied</Button>
+                  ) : (
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="primary"
+                      disabled={!!applying[job._id || job.id]}
+                      onClick={() => handleApply(job._id || job.id)}
+                    >
+                      {applying[job._id || job.id] ? 'Applying...' : 'Apply'}
+                    </Button>
+                  )
+                )}
+              </CardActions>
+            </Card>
           ))}
-        </Grid>
+        </Box>
       )}
 
       {/* Dialog for posting new job (alumni/admin only) */}

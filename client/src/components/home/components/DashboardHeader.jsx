@@ -156,9 +156,9 @@ function DashboardHeader({ setAuthToken, logo, title, menuOpen, onToggleMenu, us
             spacing={3}
             sx={{ marginLeft: 'auto' }}
           >
-            <Stack direction="row" alignItems="center">
+            {/* <Stack direction="row" alignItems="center">
               <ThemeSwitcher />
-            </Stack>
+            </Stack> */}
             <NotificationIcon />
             <Avatar 
               src={user?.image} 
