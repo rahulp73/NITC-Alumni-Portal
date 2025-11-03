@@ -138,9 +138,9 @@ export default function Alumni({ user }) {
             onChange={handleFilterChange('degree')}
           >
             <MenuItem value="">All</MenuItem>
-            <MenuItem value="B.Tech">B.Tech</MenuItem>
-            <MenuItem value="M.Tech">M.Tech</MenuItem>
-            <MenuItem value="Ph.D.">Ph.D.</MenuItem>
+            <MenuItem value="BTech">BTech</MenuItem>
+            <MenuItem value="MTech">MTech</MenuItem>
+            <MenuItem value="PhD">PhD</MenuItem>
           </TextField>
 
           <TextField
