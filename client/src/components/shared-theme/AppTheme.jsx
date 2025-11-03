@@ -11,8 +11,17 @@ import { colorSchemes, typography, shadows, shape } from './themePrimitives';
 
 function AppTheme(props) {
   const { children, themeComponents } = props;
-  // Detect browser color scheme preference
-  const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  // Detect browser color scheme preference and update on change
+  const getPrefersDarkMode = () => window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const [prefersDarkMode, setPrefersDarkMode] = React.useState(getPrefersDarkMode());
+
+  React.useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e) => setPrefersDarkMode(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
   const theme = React.useMemo(() => {
     return createTheme({
       cssVariables: {
