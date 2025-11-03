@@ -12,6 +12,7 @@ import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import Stack from '@mui/material/Stack';
 import { Link, useNavigate } from 'react-router-dom';
 import ThemeSwitcher from './ThemeSwitcher';
+import NotificationIcon from './NotificationIcon';
 import whiteLogoWithFont from '../../../images/WhiteLogoWithFont.png';
 import darkLogoWithFont from '../../../images/BlueLogoWithFont.png';
 import { useMediaQuery, Avatar, Menu, MenuItem } from '@mui/material';
@@ -153,6 +154,7 @@ function DashboardHeader({ setAuthToken, logo, title, menuOpen, onToggleMenu, us
             <Stack direction="row" alignItems="center">
               <ThemeSwitcher />
             </Stack>
+            <NotificationIcon />
             <Avatar 
               src={user?.image} 
               alt={user?.name || 'User'} 

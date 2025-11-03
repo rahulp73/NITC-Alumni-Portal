@@ -1,3 +1,7 @@
+import { Event, EventRegistration } from '../schemas/events.js';
+import Notification from '../schemas/notifications.js';
+import User from '../schemas/users.js';
+
 // Get all event IDs the current user is registered for
 export const getRegisteredEvents = async (req, res) => {
   try {
@@ -22,7 +26,6 @@ export const unregisterForEvent = async (req, res) => {
     res.status(500).json({ message: 'Error unregistering for event', error: err.message });
   }
 };
-import { Event, EventRegistration } from '../schemas/events.js';
 
 // Create a new event
 export const createEvent = async (req, res) => {
@@ -40,6 +43,26 @@ export const createEvent = async (req, res) => {
       organizerName: req.user?.name || '',
       status: 'pending',
     });
+    
+    // Create notifications for all users
+    try {
+      const allUsers = await User.find({}, '_id');
+      const notifications = allUsers.map(user => ({
+        userId: user._id,
+        type: 'event',
+        title: 'New Event Posted',
+        message: `${title} - ${new Date(date).toLocaleDateString()}`,
+        referenceId: event._id,
+      }));
+      
+      if (notifications.length > 0) {
+        await Notification.insertMany(notifications);
+      }
+    } catch (notifError) {
+      console.error("Error creating notifications:", notifError);
+      // Don't fail the event creation if notifications fail
+    }
+    
     res.status(201).json(event);
   } catch (err) {
     res.status(500).json({ message: 'Error creating event', error: err.message });

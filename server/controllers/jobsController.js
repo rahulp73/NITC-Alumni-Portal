@@ -1,4 +1,6 @@
 import { Job, Application } from '../schemas/jobs.js';
+import Notification from '../schemas/notifications.js';
+import User from '../schemas/users.js';
 
 // Create a new job
 export const createJob = async (req, res) => {
@@ -18,6 +20,26 @@ export const createJob = async (req, res) => {
       postedByUserId: req._id,
       status: 'pending',
     });
+    
+    // Create notifications for all users
+    try {
+      const allUsers = await User.find({}, '_id');
+      const notifications = allUsers.map(user => ({
+        userId: user._id,
+        type: 'job',
+        title: 'New Job Posted',
+        message: `${title} at ${company}`,
+        referenceId: job._id,
+      }));
+      
+      if (notifications.length > 0) {
+        await Notification.insertMany(notifications);
+      }
+    } catch (notifError) {
+      console.error("Error creating notifications:", notifError);
+      // Don't fail the job creation if notifications fail
+    }
+    
     res.status(201).json(job);
   } catch (err) {
     res.status(500).json({ message: 'Error creating job', error: err.message });
