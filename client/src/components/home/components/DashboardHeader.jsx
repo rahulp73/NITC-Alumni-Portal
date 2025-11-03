@@ -39,7 +39,6 @@ const LogoContainer = styled('div')({
 
 function DashboardHeader({ setAuthToken, logo, title, menuOpen, onToggleMenu, user }) {
 
-  const theme = useTheme();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const menuOpenState = Boolean(anchorEl);
@@ -52,7 +51,6 @@ function DashboardHeader({ setAuthToken, logo, title, menuOpen, onToggleMenu, us
     (isExpanded) => {
       const expandMenuActionText = 'Expand';
       const collapseMenuActionText = 'Collapse';
-
       return (
         <Tooltip
           title={`${isExpanded ? collapseMenuActionText : expandMenuActionText} menu`}
@@ -73,11 +71,9 @@ function DashboardHeader({ setAuthToken, logo, title, menuOpen, onToggleMenu, us
     [handleMenuOpen],
   );
 
-  // Determine which logo to display based on the theme mode
-  //   const currentLogo = theme.palette.mode === 'dark' ? darkLogoWithFont : whiteLogoWithFont;
-
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: light)');
-  const currentLogo = prefersDarkMode ? darkLogoWithFont : whiteLogoWithFont;
+  // Use browser theme preference for logo
+  const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const currentLogo = prefersDarkMode ? whiteLogoWithFont : darkLogoWithFont ;
 
   const handleAvatarClick = (event) => {
     setAnchorEl(event.currentTarget);
