@@ -235,15 +235,33 @@ const JobPostingsPage = ({ user }) => {
                   appliedJobs.includes(job._id || job.id) ? (
                     <Button size="small" variant="outlined" color="success" disabled>Applied</Button>
                   ) : (
-                    <Button
-                      size="small"
-                      variant="contained"
-                      color="primary"
-                      disabled={!!applying[job._id || job.id]}
-                      onClick={() => handleApply(job._id || job.id)}
-                    >
-                      {applying[job._id || job.id] ? 'Applying...' : 'Apply'}
-                    </Button>
+                    job.applicationLink ? (
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="primary"
+                        component="a"
+                        href={
+                          job.applicationLink.startsWith('http://') || job.applicationLink.startsWith('https://')
+                            ? job.applicationLink
+                            : `https://${job.applicationLink.replace(/^(https?:\/\/)?/, '')}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Apply
+                      </Button>
+                    ) : (
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="primary"
+                        disabled={!!applying[job._id || job.id]}
+                        onClick={() => handleApply(job._id || job.id)}
+                      >
+                        {applying[job._id || job.id] ? 'Applying...' : 'Apply'}
+                      </Button>
+                    )
                   )
                 )}
               </CardActions>
