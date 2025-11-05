@@ -43,6 +43,7 @@ export default function Profile({ user: initialUser, setUser }) {
     avatar: '',
   });
   const [avatarPreview, setAvatarPreview] = React.useState('');
+  const [isAvatarPreviewing, setIsAvatarPreviewing] = React.useState(false);
   const [avatarHover, setAvatarHover] = React.useState(false);
 
   // Fetch user data if not provided
@@ -80,6 +81,7 @@ export default function Profile({ user: initialUser, setUser }) {
             avatar: initialUser.avatar || '',
           });
           setAvatarPreview(initialUser.avatar ? `data:image/*;base64,${initialUser.avatar}` : '');
+          setIsAvatarPreviewing(false);
           setIsLoading(false);
           return;
         }
@@ -100,6 +102,7 @@ export default function Profile({ user: initialUser, setUser }) {
             avatar: userData.avatar || '',
           });
           setAvatarPreview(userData.avatar ? `data:image/*;base64,${userData.avatar}` : '');
+          setIsAvatarPreviewing(false);
         } else {
           setError('Failed to load user information');
         }
@@ -139,7 +142,8 @@ export default function Profile({ user: initialUser, setUser }) {
         organization: user.organization || '',
         avatar: user.avatar || '',
       });
-      setAvatarPreview(user.avatar ? `data:image/*;base64,${user.avatar}` : '');
+  setAvatarPreview(user.avatar ? `data:image/*;base64,${user.avatar}` : '');
+  setIsAvatarPreviewing(false);
     }
   };
 
@@ -305,7 +309,7 @@ export default function Profile({ user: initialUser, setUser }) {
                 >
                   {(!avatarPreview && !user?.avatar && user?.name) ? user.name.charAt(0).toUpperCase() : 'U'}
                 </Avatar>
-                {!isViewingOtherUser && avatarHover && !avatarPreview && (
+                {!isViewingOtherUser && avatarHover && !isAvatarPreviewing && (
                   <IconButton
                     sx={{
                       position: 'absolute',
@@ -331,6 +335,7 @@ export default function Profile({ user: initialUser, setUser }) {
                       const reader = new FileReader();
                       reader.onloadend = () => {
                         setAvatarPreview(reader.result);
+                        setIsAvatarPreviewing(true);
                       };
                       reader.readAsDataURL(file);
                     }
@@ -338,15 +343,19 @@ export default function Profile({ user: initialUser, setUser }) {
                 />
               </Box>
               {/* Tick and cross below avatar when previewing */}
-              {!isViewingOtherUser && avatarPreview && (
+              {!isViewingOtherUser && avatarPreview && isAvatarPreviewing && (
                 <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 1 }}>
                   <IconButton color="success" onClick={async () => {
                     await handleAvatarUpload();
                     setAvatarPreview('');
+                    setIsAvatarPreviewing(false);
                   }} disabled={isUploadingAvatar}>
                     {isUploadingAvatar ? <CircularProgress size={20} /> : <CheckIcon />}
                   </IconButton>
-                  <IconButton color="error" onClick={() => setAvatarPreview('')} disabled={isUploadingAvatar}>
+                  <IconButton color="error" onClick={() => {
+                    setAvatarPreview('');
+                    setIsAvatarPreviewing(false);
+                  }} disabled={isUploadingAvatar}>
                     <CloseIcon />
                   </IconButton>
                 </Stack>
