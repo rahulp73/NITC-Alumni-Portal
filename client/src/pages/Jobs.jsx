@@ -126,7 +126,16 @@ const JobPostingsPage = ({ user }) => {
     }));
   };
 
+  const [jobFormError, setJobFormError] = useState('');
   const handleSubmit = async () => {
+    setJobFormError('');
+    // Validate required fields
+    const requiredFields = ['title', 'company', 'location', 'description', 'applicationLink', 'type', 'applicationDeadline'];
+    const missingFields = requiredFields.filter(field => !newJob[field] || (typeof newJob[field] === 'string' && newJob[field].trim() === ''));
+    if (missingFields.length > 0) {
+      setJobFormError('Missing required fields: ' + missingFields.map(f => f.charAt(0).toUpperCase() + f.slice(1)).join(', '));
+      return;
+    }
     try {
       const res = await fetch('http://localhost:8080/jobs', {
         method: 'POST',
@@ -138,9 +147,16 @@ const JobPostingsPage = ({ user }) => {
         const createdJob = await res.json();
         setJobs((prev) => [...prev, createdJob]);
         handleClose();
+      } else {
+        const errorData = await res.json();
+        if (errorData.missingFields) {
+          setJobFormError('Missing required fields: ' + errorData.missingFields.map(f => f.charAt(0).toUpperCase() + f.slice(1)).join(', '));
+        } else {
+          setJobFormError(errorData.message || 'Error posting job');
+        }
       }
     } catch (err) {
-      // Optionally handle error
+      setJobFormError('Error posting job');
     }
   };
 
@@ -275,11 +291,11 @@ const JobPostingsPage = ({ user }) => {
         <Dialog open={open} onClose={handleClose} fullWidth>
           <DialogTitle>Post a New Job Opportunity</DialogTitle>
           <DialogContent>
-            <TextField autoFocus margin="dense" name="title" label="Job Title" fullWidth variant="standard" onChange={handleChange} />
-            <TextField margin="dense" name="company" label="Company Name" fullWidth variant="standard" onChange={handleChange} />
-            <TextField margin="dense" name="location" label="Location (e.g., Remote, City)" fullWidth variant="standard" onChange={handleChange} />
-            <TextField margin="dense" name="description" label="Job Description" fullWidth multiline rows={4} variant="standard" onChange={handleChange} />
-            <TextField margin="dense" name="applicationLink" label="Application Link or Email" fullWidth variant="standard" onChange={handleChange} />
+            <TextField autoFocus margin="dense" name="title" label="Job Title" fullWidth required variant="standard" onChange={handleChange} />
+            <TextField margin="dense" name="company" label="Company Name" fullWidth required variant="standard" onChange={handleChange} />
+            <TextField margin="dense" name="location" label="Location (e.g., Remote, City)" fullWidth required variant="standard" onChange={handleChange} />
+            <TextField margin="dense" name="description" label="Job Description" fullWidth required multiline rows={4} variant="standard" onChange={handleChange} />
+            <TextField margin="dense" name="applicationLink" label="Application Link or Email" fullWidth required variant="standard" onChange={handleChange} />
             <TextField
               margin="dense"
               name="applicationDeadline"
@@ -287,11 +303,14 @@ const JobPostingsPage = ({ user }) => {
               type="date"
               InputLabelProps={{ shrink: true }}
               fullWidth
+              required
               variant="standard"
               value={newJob.applicationDeadline}
               onChange={handleChange}
-              required
             />
+            {jobFormError && (
+              <Typography color="error" variant="body2" sx={{ mt: 1 }}>{jobFormError}</Typography>
+            )}
 
             {/* Tags Section */}
             <Box sx={{ mt: 2 }}>

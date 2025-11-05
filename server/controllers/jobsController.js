@@ -5,6 +5,14 @@ import User from '../schemas/users.js';
 // Create a new job
 export const createJob = async (req, res) => {
   try {
+    const requiredFields = ['title', 'company', 'location', 'description', 'applicationLink', 'type', 'applicationDeadline'];
+    const missingFields = requiredFields.filter(field => {
+      const value = req.body ? req.body[field] : undefined;
+      return !value || (typeof value === 'string' && value.trim() === '');
+    });
+    if (missingFields.length > 0) {
+      return res.status(400).json({ message: 'Missing required fields', missingFields });
+    }
     const { title, company, location, description, applicationLink, type, tags, skillsRequired, applicationDeadline, internalApply } = req.body;
     const job = await Job.create({
       title,
@@ -20,7 +28,6 @@ export const createJob = async (req, res) => {
       postedByUserId: req._id,
       status: 'pending',
     });
-    
     // Create notifications for all users
     try {
       const allUsers = await User.find({}, '_id');
@@ -31,7 +38,6 @@ export const createJob = async (req, res) => {
         message: `${title} at ${company}`,
         referenceId: job._id,
       }));
-      
       if (notifications.length > 0) {
         await Notification.insertMany(notifications);
       }
@@ -39,7 +45,6 @@ export const createJob = async (req, res) => {
       console.error("Error creating notifications:", notifError);
       // Don't fail the job creation if notifications fail
     }
-    
     res.status(201).json(job);
   } catch (err) {
     res.status(500).json({ message: 'Error creating job', error: err.message });

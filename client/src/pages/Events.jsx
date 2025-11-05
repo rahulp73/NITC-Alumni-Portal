@@ -117,8 +117,23 @@ const EventsPage = ({ user }) => {
     setTags(tags.filter(tag => tag !== tagToDelete));
   };
 
+  const [eventFormError, setEventFormError] = useState('');
   const handleCreateEvent = async (e) => {
     e.preventDefault();
+    setEventFormError('');
+    // Validate required fields
+    const requiredFields = [
+      { key: 'title', value: title },
+      { key: 'date', value: date },
+      { key: 'endDate', value: endDate },
+      { key: 'location', value: location },
+      { key: 'description', value: description }
+    ];
+    const missingFields = requiredFields.filter(f => !f.value || (typeof f.value === 'string' && f.value.trim() === '')).map(f => f.key);
+    if (missingFields.length > 0) {
+      setEventFormError('Missing required fields: ' + missingFields.map(f => f.charAt(0).toUpperCase() + f.slice(1)).join(', '));
+      return;
+    }
     try {
       const res = await fetch('http://localhost:8080/events', {
         method: 'POST',
@@ -130,9 +145,16 @@ const EventsPage = ({ user }) => {
         const newEvent = await res.json();
         setEvents((prev) => [...prev, newEvent]);
         handleClose();
+      } else {
+        const errorData = await res.json();
+        if (errorData.missingFields) {
+          setEventFormError('Missing required fields: ' + errorData.missingFields.map(f => f.charAt(0).toUpperCase() + f.slice(1)).join(', '));
+        } else {
+          setEventFormError(errorData.message || 'Error creating event');
+        }
       }
     } catch (err) {
-      // Optionally handle error
+      setEventFormError('Error creating event');
     }
   };
 
@@ -200,6 +222,9 @@ const EventsPage = ({ user }) => {
 
           <DialogContent dividers>
             <Stack spacing={2} mt={1}>
+              {eventFormError && (
+                <Typography color="error" variant="body2" sx={{ mt: 1 }}>{eventFormError}</Typography>
+              )}
               <TextField
                 label="Event Title"
                 value={title}
