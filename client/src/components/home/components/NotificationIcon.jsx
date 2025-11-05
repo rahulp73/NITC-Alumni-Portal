@@ -122,9 +122,8 @@ export default function NotificationIcon() {
     <>
       <IconButton
         onClick={handleClick}
-        sx={{ color: 'inherit' }}
+        sx={{ color: 'inherit', border:'none' }}
         aria-label="notifications"
-        sx={{ border:'none'}}
       >
         <Badge badgeContent={unreadCount} color="error">
           <NotificationsIcon />

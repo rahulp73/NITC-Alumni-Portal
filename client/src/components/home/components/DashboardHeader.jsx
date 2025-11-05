@@ -160,12 +160,18 @@ function DashboardHeader({ setAuthToken, logo, title, menuOpen, onToggleMenu, us
               <ThemeSwitcher />
             </Stack> */}
             <NotificationIcon />
-            <Avatar 
-              src={user?.image} 
-              alt={user?.name || 'User'} 
+            <Avatar
+              src={
+                user?.avatar
+                  ? user.avatar.startsWith('data:image')
+                    ? user.avatar
+                    : `data:image/*;base64,${user.avatar}`
+                  : undefined
+              }
+              alt={user?.name || 'User'}
               onClick={handleAvatarClick}
-              sx={{ 
-                width: 32, 
+              sx={{
+                width: 32,
                 height: 32,
                 cursor: 'pointer'
               }}
