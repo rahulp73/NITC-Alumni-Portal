@@ -13,6 +13,7 @@ import {
   TextField,
   Chip,
   IconButton,
+  TextareaAutosize,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
@@ -257,14 +258,17 @@ const EventsPage = ({ user }) => {
                 fullWidth
                 required
               />
-              <TextField
-                label="Description"
-                multiline
-                rows={3}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                fullWidth
-              />
+              <Box sx={{ width: '100%', mb: 2 }}>
+                <Typography variant="body2" sx={{ mb: 0.5 }}>Description</Typography>
+                <TextareaAutosize
+                  minRows={3}
+                  maxRows={8}
+                  style={{ width: '100%', resize: 'vertical', borderRadius: 8, padding: 12, fontSize: '1rem', background: '#181a1b', color: '#e0e0e0', border: '1px solid #333', boxSizing: 'border-box' }}
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  placeholder="Enter event description..."
+                />
+              </Box>
 
               {/* ✅ Tag Input */}
               <Stack direction="row" spacing={1} alignItems="center">
