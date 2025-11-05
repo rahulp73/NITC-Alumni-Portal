@@ -17,7 +17,10 @@ import {
   CardContent,
   CardActions,
   Link,
+  IconButton,
+  TextareaAutosize
 } from '@mui/material';
+import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from '@mui/icons-material/Add';
 import PageContainer from '../components/home/components/PageContainer';
 // import { getJobs, postJob } from '../services/api'; // keep for API integration later
@@ -288,66 +291,107 @@ const JobPostingsPage = ({ user }) => {
 
       {/* Dialog for posting new job (alumni/admin only) */}
       {canPostJob && (
-        <Dialog open={open} onClose={handleClose} fullWidth>
-          <DialogTitle>Post a New Job Opportunity</DialogTitle>
-          <DialogContent>
-            <TextField autoFocus margin="dense" name="title" label="Job Title" fullWidth required variant="standard" onChange={handleChange} />
-            <TextField margin="dense" name="company" label="Company Name" fullWidth required variant="standard" onChange={handleChange} />
-            <TextField margin="dense" name="location" label="Location (e.g., Remote, City)" fullWidth required variant="standard" onChange={handleChange} />
-            <TextField margin="dense" name="description" label="Job Description" fullWidth required multiline rows={4} variant="standard" onChange={handleChange} />
-            <TextField margin="dense" name="applicationLink" label="Application Link or Email" fullWidth required variant="standard" onChange={handleChange} />
-            <TextField
-              margin="dense"
-              name="applicationDeadline"
-              label="Application Deadline"
-              type="date"
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-              required
-              variant="standard"
-              value={newJob.applicationDeadline}
-              onChange={handleChange}
-            />
-            {jobFormError && (
-              <Typography color="error" variant="body2" sx={{ mt: 1 }}>{jobFormError}</Typography>
-            )}
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogTitle>
+            Post a New Opportunity
+            <IconButton
+              aria-label="close"
+              onClick={handleClose}
+              sx={{ position: 'absolute', right: 8, top: 8 }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent dividers>
+            <Stack spacing={2} mt={1}>
+              {jobFormError && (
+                <Typography color="error" variant="body2" sx={{ mt: 1 }}>{jobFormError}</Typography>
+              )}
+              <TextField
+                label="Job Title"
+                name="title"
+                value={newJob.title}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Company Name"
+                name="company"
+                value={newJob.company}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Location (e.g., Remote, City)"
+                name="location"
+                value={newJob.location}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Application Deadline"
+                name="applicationDeadline"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={newJob.applicationDeadline}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+              <Box sx={{ width: '100%', mb: 2 }}>
+                <Typography variant="body2" sx={{ mb: 0.5 }}>Job Description</Typography>
+                <TextareaAutosize
+                  minRows={3}
+                  maxRows={8}
+                  style={{ width: '100%', resize: 'vertical', borderRadius: 8, padding: 12, fontSize: '1rem', background: '#181a1b', color: '#e0e0e0', border: '1px solid #333', boxSizing: 'border-box' }}
+                  value={newJob.description}
+                  onChange={e => setNewJob(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Enter job description..."
+                />
+              </Box>
 
-            {/* Tags Section */}
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle1">Tags</Typography>
-              <form onSubmit={handleAddTag}>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <TextField
-                    size="small"
-                    label="Add a tag"
-                    variant="outlined"
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                  />
-                  <Button type="submit" variant="contained">
-                    Add
-                  </Button>
-                </Stack>
-              </form>
-
-              <Stack direction="row" flexWrap="wrap" gap={1} mt={2}>
+              <TextField
+                label="Application Link or Email"
+                name="applicationLink"
+                value={newJob.applicationLink}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+              {/* Tag Input */}
+              <Stack direction="row" spacing={1} alignItems="center">
+                <TextField
+                  label="Add Tag"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  size="small"
+                  fullWidth
+                />
+                <Button variant="outlined" onClick={handleAddTag}>
+                  Add
+                </Button>
+              </Stack>
+              {/* Display Tags */}
+              <Stack direction="row" spacing={1} flexWrap="wrap">
                 {newJob.tags.map((tag) => (
                   <Chip
                     key={tag}
                     label={tag}
                     onDelete={() => handleDeleteTag(tag)}
-                    color="primary"
-                    variant="outlined"
+                    color="success"
+                    size="small"
                   />
                 ))}
               </Stack>
-            </Box>
+            </Stack>
           </DialogContent>
-
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
             <Button onClick={handleSubmit} variant="contained">
-              Submit for Review
+              Post
             </Button>
           </DialogActions>
         </Dialog>

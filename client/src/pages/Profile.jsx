@@ -207,6 +207,9 @@ export default function Profile({ user: initialUser, setUser }) {
       if (res.ok) {
         const data = await res.json();
         setUserState((prev) => ({ ...prev, avatar: data.avatar }));
+        if (typeof setUser === 'function') {
+          setUser((prev) => ({ ...prev, avatar: data.avatar }));
+        }
         notifications.show('Avatar updated successfully', {
           severity: 'success',
           autoHideDuration: 3000,
