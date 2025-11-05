@@ -181,13 +181,13 @@ const EventsPage = ({ user }) => {
           <Typography variant="h6">There are no upcoming events.</Typography>
         </Box>
       ) : (
-        <Grid container spacing={2}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
           {events.map(event => {
             const eventId = event._id || event.id;
             const isRegistered = registeredEvents.includes(eventId);
             const isLoading = !!registering[eventId];
             return (
-              <Grid item xs={12} md={6} key={eventId}>
+              <Box key={eventId} sx={{ flex: '1 1 350px', minWidth: 320, maxWidth: 420 }}>
                 <EventCard
                   event={event}
                   user={user}
@@ -196,10 +196,10 @@ const EventsPage = ({ user }) => {
                   onRegister={() => handleRegister(eventId)}
                   onUnregister={() => handleUnregister(eventId)}
                 />
-              </Grid>
+              </Box>
             );
           })}
-        </Grid>
+        </Box>
       )}
 
       {/* ✅ Create Event Modal */}

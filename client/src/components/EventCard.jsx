@@ -7,34 +7,42 @@ const EventCard = ({ event, user, isRegistered, isLoading, onRegister, onUnregis
   // Only show action for students/alumni
   const canRegister = user?.role === 'student' || user?.role === 'alumni';
   return (
-    <Card sx={{ minWidth: 275, mb: 2, p: 1 }}>
-      <CardContent>
-        <Typography variant="h5" component="div" gutterBottom>
+    <Card sx={{
+      width: { xs: '100%', sm: 340, md: 360 },
+      minWidth: 280,
+      maxWidth: 400,
+      flex: '1 1 320px',
+      display: 'flex',
+      flexDirection: 'column',
+      borderRadius: 2,
+      boxShadow: 3,
+      mb: 2,
+    }}>
+      <CardContent sx={{ flex: '1 1 auto' }}>
+        <Typography variant="h6" component="div" sx={{ fontWeight: 600, mb: 1 }}>
           {event.title}
         </Typography>
-        <Typography sx={{ mb: 1 }} color="text.secondary">
-          {new Date(event.date).toLocaleDateString()} — {event.location}
+        <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 0.5 }}>
+          {new Date(event.date).toLocaleDateString()} • {event.location}
         </Typography>
-        <Typography variant="body2" sx={{ mb: 1.5 }}>
+        <Typography variant="body2" sx={{ mb: 2 }}>
           {event.description}
         </Typography>
-
-        {/* ✅ Tags */}
-        {event.tags && (
-          <Stack direction="row" spacing={1} flexWrap="wrap">
+        {event.tags && event.tags.length > 0 && (
+          <Stack direction="row" flexWrap="wrap" gap={1} mt={2}>
             {event.tags.map((tag, index) => (
               <Chip
                 key={index}
                 label={tag}
-                color={index % 2 === 0 ? 'success' : 'default'}
+                color="primary"
                 size="small"
+                variant="filled"
               />
             ))}
           </Stack>
         )}
       </CardContent>
-
-      <CardActions>
+      <CardActions sx={{ mt: 'auto', justifyContent: 'flex-end' }}>
         {canRegister && (
           <Button
             size="small"
