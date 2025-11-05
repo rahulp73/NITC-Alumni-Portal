@@ -12,7 +12,11 @@ import {
   CircularProgress,
   Alert,
   Divider,
+  IconButton
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 import PageContainer from '../components/home/components/PageContainer';
 import useNotifications from '../components/home/hooks/useNotifications/useNotifications';
 import { useParams } from 'react-router-dom';
@@ -36,7 +40,10 @@ export default function Profile({ user: initialUser, setUser }) {
     industryDomain: '',
     currentLocation: '',
     organization: '',
+    avatar: '',
   });
+  const [avatarPreview, setAvatarPreview] = React.useState('');
+  const [avatarHover, setAvatarHover] = React.useState(false);
 
   // Fetch user data if not provided
   React.useEffect(() => {
@@ -70,7 +77,9 @@ export default function Profile({ user: initialUser, setUser }) {
             industryDomain: initialUser.industryDomain || '',
             currentLocation: initialUser.currentLocation || '',
             organization: initialUser.organization || '',
+            avatar: initialUser.avatar || '',
           });
+          setAvatarPreview(initialUser.avatar ? `data:image/*;base64,${initialUser.avatar}` : '');
           setIsLoading(false);
           return;
         }
@@ -88,7 +97,9 @@ export default function Profile({ user: initialUser, setUser }) {
             industryDomain: userData.industryDomain || '',
             currentLocation: userData.currentLocation || '',
             organization: userData.organization || '',
+            avatar: userData.avatar || '',
           });
+          setAvatarPreview(userData.avatar ? `data:image/*;base64,${userData.avatar}` : '');
         } else {
           setError('Failed to load user information');
         }
@@ -126,7 +137,9 @@ export default function Profile({ user: initialUser, setUser }) {
         industryDomain: user.industryDomain || '',
         currentLocation: user.currentLocation || '',
         organization: user.organization || '',
+        avatar: user.avatar || '',
       });
+      setAvatarPreview(user.avatar ? `data:image/*;base64,${user.avatar}` : '');
     }
   };
 
@@ -134,13 +147,15 @@ export default function Profile({ user: initialUser, setUser }) {
     setIsSaving(true);
     setError(null);
     try {
+      const payload = { ...formData };
+      // Remove avatar from profile update payload
+      delete payload.avatar;
       const res = await fetch('http://localhost:8080/userInfo', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
-
       if (res.ok) {
         const updatedUser = await res.json();
         setUserState(updatedUser.user || updatedUser);
@@ -149,7 +164,6 @@ export default function Profile({ user: initialUser, setUser }) {
           severity: 'success',
           autoHideDuration: 3000,
         });
-        // Update parent if setUser prop is provided
         if (setUser) {
           setUser(updatedUser.user || updatedUser);
         }
@@ -169,6 +183,46 @@ export default function Profile({ user: initialUser, setUser }) {
       });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // Avatar upload handler (decoupled)
+  const [isUploadingAvatar, setIsUploadingAvatar] = React.useState(false);
+  const handleAvatarUpload = async () => {
+    if (!avatarPreview || !avatarPreview.startsWith('data:image')) return;
+    setIsUploadingAvatar(true);
+    setError(null);
+    try {
+      const base64 = avatarPreview.split(',')[1];
+      const res = await fetch('http://localhost:8080/user/avatar', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ avatar: base64 }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUserState((prev) => ({ ...prev, avatar: data.avatar }));
+        notifications.show('Avatar updated successfully', {
+          severity: 'success',
+          autoHideDuration: 3000,
+        });
+      } else {
+        const errorData = await res.json();
+        setError(errorData.message || 'Failed to update avatar');
+        notifications.show('Failed to update avatar', {
+          severity: 'error',
+          autoHideDuration: 3000,
+        });
+      }
+    } catch (err) {
+      setError('Failed to update avatar');
+      notifications.show('Failed to update avatar', {
+        severity: 'error',
+        autoHideDuration: 3000,
+      });
+    } finally {
+      setIsUploadingAvatar(false);
     }
   };
 
@@ -230,19 +284,85 @@ export default function Profile({ user: initialUser, setUser }) {
           )}
 
           <Stack direction="row" spacing={3} alignItems="center" sx={{ mb: 4 }}>
-            <Avatar
-              src={user?.image}
-              alt={user?.name || 'User'}
-              sx={{ 
-                width: 100, 
-                height: 100,
-                fontSize: '3rem',
-                fontWeight: 600
-              }}
-            >
-              {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-            </Avatar>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 100 }}>
+              <Box
+                sx={{ position: 'relative', width: 100, height: 100 }}
+                onMouseEnter={() => setAvatarHover(true)}
+                onMouseLeave={() => setAvatarHover(false)}
+              >
+                <Avatar
+                  src={avatarPreview || (user?.avatar ? `data:image/*;base64,${user.avatar}` : '')}
+                  alt={user?.name || 'User'}
+                  sx={{ 
+                    width: 100, 
+                    height: 100,
+                    fontSize: '3rem',
+                    fontWeight: 600,
+                    filter: avatarHover ? 'blur(2px)' : 'none',
+                    transition: 'filter 0.2s',
+                    cursor: !isViewingOtherUser ? 'pointer' : 'default'
+                  }}
+                >
+                  {(!avatarPreview && !user?.avatar && user?.name) ? user.name.charAt(0).toUpperCase() : 'U'}
+                </Avatar>
+                {!isViewingOtherUser && avatarHover && !avatarPreview && (
+                  <IconButton
+                    sx={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      background: 'rgba(255,255,255,0.7)',
+                      zIndex: 2
+                    }}
+                    onClick={() => document.getElementById('avatar-upload-input').click()}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                )}
+                <input
+                  id="avatar-upload-input"
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={e => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setAvatarPreview(reader.result);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </Box>
+              {/* Tick and cross below avatar when previewing */}
+              {!isViewingOtherUser && avatarPreview && (
+                <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 1 }}>
+                  <IconButton color="success" onClick={async () => {
+                    await handleAvatarUpload();
+                    setAvatarPreview('');
+                  }} disabled={isUploadingAvatar}>
+                    {isUploadingAvatar ? <CircularProgress size={20} /> : <CheckIcon />}
+                  </IconButton>
+                  <IconButton color="error" onClick={() => setAvatarPreview('')} disabled={isUploadingAvatar}>
+                    <CloseIcon />
+                  </IconButton>
+                </Stack>
+              )}
+            </Box>
             <Box>
+            {/* {!isViewingOtherUser && avatarPreview && (
+              <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 1 }}>
+                <IconButton color="success" onClick={handleAvatarUpload} disabled={isUploadingAvatar}>
+                  {isUploadingAvatar ? <CircularProgress size={20} /> : <CheckIcon />}
+                </IconButton>
+                <IconButton color="error" onClick={() => setAvatarPreview('')} disabled={isUploadingAvatar}>
+                  <CloseIcon />
+                </IconButton>
+              </Stack>
+            )} */}
               <Typography variant="h4" component="div" sx={{ fontSize: '1.75rem', fontWeight: 600 }}>
                 {user?.name || 'User'}
               </Typography>
