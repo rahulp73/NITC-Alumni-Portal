@@ -18,9 +18,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false // Only required for standard sign-up
   },
-  image: {
-    type: String
-  },
+    avatar: {
+      type: Buffer,
+      ContentType: String
+    },
   graduationYear: {
     type: Number
   },

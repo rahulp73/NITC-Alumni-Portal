@@ -1,3 +1,26 @@
+export const uploadAvatar = async (req, res) => {
+  try {
+    const _id = req._id;
+    const { avatar } = req.body;
+    if (!avatar) {
+      return res.status(400).json({ message: 'No avatar image provided' });
+    }
+    const buffer = Buffer.from(avatar, 'base64');
+    const user = await User.findByIdAndUpdate(
+      _id,
+      { $set: { avatar: buffer } },
+      { new: true, runValidators: true }
+    );
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.status(200).json({
+      avatar: user.avatar ? user.avatar.toString('base64') : null,
+      message: 'Avatar updated successfully'
+    });
+  } catch (error) {
+    console.error('Error uploading avatar:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 import User from '../schemas/users.js';
 
 export const getUserInfo = async (req, res) => {
@@ -8,7 +31,7 @@ export const getUserInfo = async (req, res) => {
     res.status(200).json({
       email: user.email,
       name: user.name,
-      image: user.image,
+      avatar: user.avatar ? user.avatar.toString('base64') : null,
       role: user.role,
       graduationYear: user.graduationYear,
       degreeType: user.degreeType,
@@ -33,7 +56,7 @@ export const getUserById = async (req, res) => {
     res.status(200).json({
       email: user.email,
       name: user.name,
-      image: user.image,
+      avatar: user.avatar ? user.avatar.toString('base64') : null,
       role: user.role,
       graduationYear: user.graduationYear,
       degreeType: user.degreeType,
@@ -61,18 +84,20 @@ export const updateUserInfo = async (req, res) => {
     delete updateData.status;
     delete updateData.password;
     
+    // Handle avatar upload (expects base64 string in updateData.avatar)
+    if (updateData.avatar) {
+      updateData.avatar = Buffer.from(updateData.avatar, 'base64');
+    }
     const user = await User.findByIdAndUpdate(
       _id,
       { $set: updateData },
       { new: true, runValidators: true }
     );
-    
     if (!user) return res.status(404).json({ message: 'User not found' });
-    
     res.status(200).json({
       email: user.email,
       name: user.name,
-      image: user.image,
+      avatar: user.avatar ? user.avatar.toString('base64') : null,
       role: user.role,
       graduationYear: user.graduationYear,
       degreeType: user.degreeType,

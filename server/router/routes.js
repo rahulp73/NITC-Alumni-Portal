@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { googleAuth, logout, signup, signin } from "../controllers/authController.js";
-import { getUserInfo, updateUserInfo, getUserById } from "../controllers/userInfoController.js";
+import { getUserInfo, updateUserInfo, getUserById, uploadAvatar } from "../controllers/userInfoController.js";
 
 const router = Router();
 
@@ -13,5 +13,6 @@ router.post("/auth/signin", signin);
 router.get("/userInfo", authMiddleware ,getUserInfo);
 router.put("/userInfo", authMiddleware, updateUserInfo);
 router.get("/user/:userId", authMiddleware, getUserById);
+router.put("/user/avatar", authMiddleware, uploadAvatar);
 
 export default router;
