@@ -28,7 +28,6 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const load = async () => {
-      setLoading(true);
       try {
         const [events, jobs] = await Promise.all([
           fetchPending('http://localhost:8080/events?pending=1'),
@@ -41,6 +40,32 @@ export default function AdminDashboard() {
     };
     load();
   }, []);
+
+  const handleDelete = async (type, id) => {
+    setVerifying(v => ({ ...v, [`${type}-delete-${id}`]: true }));
+    try {
+      const url = `http://localhost:8080/${type}/${id}`;
+      const res = await fetch(url, { method: 'DELETE', credentials: 'include' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert('Failed to delete: ' + (err.message || res.status));
+        return;
+      }
+      // Refetch pending lists
+      try {
+        const [events, jobs] = await Promise.all([
+          fetchPending('http://localhost:8080/events?pending=1'),
+          fetchPending('http://localhost:8080/jobs?pending=1'),
+        ]);
+        setPendingEvents(events.filter(e => e.status === 'pending'));
+        setPendingJobs(jobs.filter(j => j.status === 'pending'));
+      } catch {}
+    } catch (e) {
+      alert('Network or server error deleting.');
+    } finally {
+      setVerifying(v => ({ ...v, [`${type}-delete-${id}`]: false }));
+    }
+  };
 
   const handleVerify = async (type, id) => {
     console.log("Verifying", type, id);
@@ -101,8 +126,17 @@ export default function AdminDashboard() {
                     color="success"
                     disabled={verifying[`events-${event._id || event.id}`]}
                     onClick={() => handleVerify('events', event._id || event.id)}
+                    sx={{ mr: 1 }}
                   >
                     {verifying[`events-${event._id || event.id}`] ? 'Verifying...' : 'Verify'}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    disabled={verifying[`events-delete-${event._id || event.id}`]}
+                    onClick={() => handleDelete('events', event._id || event.id)}
+                  >
+                    {verifying[`events-delete-${event._id || event.id}`] ? 'Deleting...' : 'Reject'}
                   </Button>
                 </Paper>
               </Grid>
@@ -126,8 +160,17 @@ export default function AdminDashboard() {
                     color="success"
                     disabled={verifying[`jobs-${job._id || job.id}`]}
                     onClick={() => handleVerify('jobs', job._id || job.id)}
+                    sx={{ mr: 1 }}
                   >
                     {verifying[`jobs-${job._id || job.id}`] ? 'Verifying...' : 'Verify'}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    disabled={verifying[`jobs-delete-${job._id || job.id}`]}
+                    onClick={() => handleDelete('jobs', job._id || job.id)}
+                  >
+                    {verifying[`jobs-delete-${job._id || job.id}`] ? 'Deleting...' : 'Reject'}
                   </Button>
                 </Paper>
               </Grid>

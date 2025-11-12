@@ -92,6 +92,18 @@ export const verifyJob = async (req, res) => {
   }
 };
 
+// Admin: delete job (reject)
+export const deleteJob = async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const deleted = await Job.findByIdAndDelete(jobId);
+    if (!deleted) return res.status(404).json({ message: 'Job not found' });
+    res.json({ message: 'Job and related notifications deleted' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error deleting job', error: err.message });
+  }
+}
+
 // Apply for a job
 export const applyForJob = async (req, res) => {
   try {
