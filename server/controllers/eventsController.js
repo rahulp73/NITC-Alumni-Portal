@@ -111,6 +111,8 @@ export const deleteEvent = async (req, res) => {
     const { eventId } = req.params;
     const deleted = await Event.findByIdAndDelete(eventId);
     if (!deleted) return res.status(404).json({ message: 'Event not found' });
+    // Delete all notifications related to this event
+    await Notification.deleteMany({ referenceId: eventId, type: 'event' });
     res.json({ message: 'Event and related notifications deleted' });
   } catch (err) {
     res.status(500).json({ message: 'Error deleting event', error: err.message });
