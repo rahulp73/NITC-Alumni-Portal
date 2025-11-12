@@ -98,6 +98,8 @@ export const deleteJob = async (req, res) => {
     const { jobId } = req.params;
     const deleted = await Job.findByIdAndDelete(jobId);
     if (!deleted) return res.status(404).json({ message: 'Job not found' });
+    // Delete all notifications related to this job
+    await Notification.deleteMany({ referenceId: jobId, type: 'job' });
     res.json({ message: 'Job and related notifications deleted' });
   } catch (err) {
     res.status(500).json({ message: 'Error deleting job', error: err.message });
